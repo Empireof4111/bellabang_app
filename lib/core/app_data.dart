@@ -1,8 +1,5 @@
 import 'package:bella_banga/src/model/bottom_navy_bar_item.dart';
 import 'package:bella_banga/src/model/recommended_product.dart';
-import 'package:bella_banga/src/model/product_category.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:bella_banga/src/model/productModel.dart';
 import 'package:flutter/material.dart';
 
 class AppData {
@@ -167,34 +164,7 @@ class AppData {
   //   ),
   // ];
 
-  static List<ProductCategory> categories = [
-    ProductCategory(
-      ProductType.all,
-      true,
-      Icons.all_inclusive,
-    ),
-    ProductCategory(
-      ProductType.mobile,
-      false,
-      FontAwesomeIcons.mobileScreenButton,
-    ),
-    ProductCategory(ProductType.watch, false, Icons.watch),
-    ProductCategory(
-      ProductType.tablet,
-      false,
-      FontAwesomeIcons.tablet,
-    ),
-    ProductCategory(
-      ProductType.headphone,
-      false,
-      Icons.headphones,
-    ),
-    ProductCategory(
-      ProductType.tv,
-      false,
-      Icons.tv,
-    ),
-  ];
+ 
 
   static List<Color> randomColors = [
     const Color(0xFFFCE4EC),

@@ -1,26 +1,121 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:bella_banga/src/utility.dart';
+import 'package:flutter/material.dart';
+
+import 'package:bella_banga/boxes.dart';
 import 'package:bella_banga/core/app_color.dart';
 import 'package:bella_banga/core/default_button.dart';
+import 'package:bella_banga/src/model/local_storage_model/addtocartmodel.dart';
 import 'package:bella_banga/src/view/screen/home_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:flutterwave_standard/flutterwave.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
-  static String routeName = '/Checkout';
+  static const String routeName = '/Checkout';
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
+
+
+  late double totalPrice = 0.0;
+  void calculateTotalPrice() {
+    double newTotalPrice = 0.0;
+    for (int index = 0; index < cartBox.length; index++) {
+      Addtocartmodel addtocartmodel = cartBox.getAt(index);
+      newTotalPrice += addtocartmodel.productPrice * addtocartmodel.productQuantity;
+    }
+
+    setState(() {
+      totalPrice = newTotalPrice;
+    });
+  }
+
+  late double totalShippingFee = 0.0;
+  void calculateTotalShippingFee() {
+    double newTotalPrice = 0.0;
+    for (int index = 0; index < cartBox.length; index++) {
+      Addtocartmodel addtocartmodel = cartBox.getAt(index);
+      newTotalPrice += addtocartmodel.cartShippingFee;
+    }
+
+    setState(() {
+      totalShippingFee = newTotalPrice;
+    });
+  }
+
+   late double totalServiceCharge = 0.0;
+  void calculateTotalServcieCharge() {
+    double newTotalPrice = 0.0;
+    for (int index = 0; index < cartBox.length; index++) {
+      Addtocartmodel addtocartmodel = cartBox.getAt(index);
+      newTotalPrice += addtocartmodel.cartServiceCharged;
+    }
+
+    setState(() {
+      totalServiceCharge = newTotalPrice;
+    });
+  }
+
+    _handlePaymentInitialization( double totalAmount) async {
+    final Customer customer = Customer(email: "customer@customer.com");
+
+    final Flutterwave flutterwave = Flutterwave(
+        context: context,
+        publicKey: "FLWPUBK_TEST-3f74bf90d07b6f3be179d49f5ed7b87e-X",
+        currency: "NGN",
+        redirectUrl: "www.zomo.com",
+        txRef: "payment from Mobile App",
+        amount: totalAmount.toString(),
+        customer: customer,
+        paymentOptions: "card, payattitude, barter, bank transfer, ussd",
+        customization: Customization(title: "Test Payment"),
+        isTestMode: true);
+    final ChargeResponse response = await flutterwave.charge();
+    showLoading(response.toString());
+    print("${response.toJson()}");
+  }
+
+
+Future<void> showLoading(String message) {
+    return showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Container(
+            margin: const EdgeInsets.fromLTRB(30, 20, 30, 20),
+            width: double.infinity,
+            height: 50,
+            child: Text(message),
+          ),
+        );
+      },
+    );
+  }
+
+
+String getPublicKey() {
+    return "";
+  }
+
+  
   @override
   Widget build(BuildContext context) {
+    calculateTotalPrice();
+    calculateTotalShippingFee();
+    calculateTotalServcieCharge();
+    double totalAmount = (totalPrice + totalShippingFee + totalServiceCharge);
+
     return Scaffold(
 appBar:  AppBar(
-  title: Text('Checkout',  style: Theme.of(context).textTheme.displayLarge,),
-      backgroundColor: Colors.transparent,
+        backgroundColor: AppColor.lightOrange,
+        title: const Text('Check Out', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
       elevation: 0,
       leading: IconButton(
         onPressed: () => Navigator.pop(context),
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: const Icon(Icons.arrow_back, color: Colors.white),
       ),
     ),
     body: SingleChildScrollView(
@@ -28,7 +123,7 @@ appBar:  AppBar(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
              Padding(
-               padding: const EdgeInsets.only(left: 20),
+               padding: const EdgeInsets.only(left: 20, top: 20),
                child: Row(
                  children: [
                    Text("Order list",  style: Theme.of(context).textTheme.displayMedium,),
@@ -36,11 +131,21 @@ appBar:  AppBar(
                ),
              ),
             const SizedBox(
-              height: 20,
+              height: 10,
             ),
-            const CartCard(),
-            const CartCard(),
-            const CartCard(),
+
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: cartBox.length,  itemBuilder: (context, index){
+              Addtocartmodel addtocartmodel = cartBox.getAt(index);
+                        return   CartCard(
+                          cartImage: addtocartmodel.cartImageUrl, 
+                          cartProductName: addtocartmodel.productName, 
+                          cartProductSize: addtocartmodel.productSize, 
+                          cartProductQuantity: addtocartmodel.productQuantity, 
+                          cartProductPrice: addtocartmodel.productPrice, 
+                          cartColor: addtocartmodel.productColor, shippingFees: addtocartmodel.cartShippingFee);
+            }),
              const SizedBox(
               height: 20,
             ),
@@ -145,99 +250,97 @@ appBar:  AppBar(
           ),
         ),
  
- const SizedBox(
-              height: 20,
-            ),
+
         //End Address
-          Padding(
-               padding: const EdgeInsets.only(left: 20),
-               child: Row(
-                 children: [
-                   Text("Promo code",  style: Theme.of(context).textTheme.displayMedium,),
-                 ],
-               ),
-             ),
-              const SizedBox(
-              height: 20,
-            ),
+          // Padding(
+          //      padding: const EdgeInsets.only(left: 20),
+          //      child: Row(
+          //        children: [
+          //          Text("Promo code",  style: Theme.of(context).textTheme.displayMedium,),
+          //        ],
+          //      ),
+          //    ),
+          //     const SizedBox(
+          //     height: 20,
+          //   ),
           //promo code card
           
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              Container(
-                height: 80,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: AppColor.lightGrey,
-                      blurRadius: 25.0, // soften the shadow
-                      spreadRadius: 1.0, //extend the shadow
-                      offset: Offset(
-                        0.0, // Move to right 10  horizontally
-                        0.0, // Move to bottom 10 Vertically
-                      ),
-                    )
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: AppColor.darkOrange,
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: AppColor.lightGrey,
-                                  blurRadius: 25.0, // soften the shadow
-                                  spreadRadius: 1.0, //extend the shadow
-                                  offset: Offset(
-                                    0.0, // Move to right 10  horizontally
-                                    0.0, // Move to bottom 10 Vertically
-                                  ),
-                                )
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.percent,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const Text(
-                            "Code TRYNEW applied!",
-                            style: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(width: 30),
-                          const Text(
-                            "Remove",
-                            style: TextStyle(
-                              fontSize: 16, color: Colors.red
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        // Padding(
+        //   padding: const EdgeInsets.symmetric(horizontal: 20),
+        //   child: Column(
+        //     children: [
+        //       Container(
+        //         height: 80,
+        //         width: double.infinity,
+        //         decoration: BoxDecoration(
+        //           color: Colors.white,
+        //           borderRadius: BorderRadius.circular(10),
+        //           boxShadow: const [
+        //             BoxShadow(
+        //               color: AppColor.lightGrey,
+        //               blurRadius: 25.0, // soften the shadow
+        //               spreadRadius: 1.0, //extend the shadow
+        //               offset: Offset(
+        //                 0.0, // Move to right 10  horizontally
+        //                 0.0, // Move to bottom 10 Vertically
+        //               ),
+        //             )
+        //           ],
+        //         ),
+        //         child: Padding(
+        //           padding: const EdgeInsets.all(10),
+        //           child: Column(
+        //             crossAxisAlignment: CrossAxisAlignment.start,
+        //             mainAxisAlignment: MainAxisAlignment.center,
+        //             children: [
+        //               Row(
+        //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //                 children: [
+        //                   Container(
+        //                     width: 50,
+        //                     height: 50,
+        //                     decoration: BoxDecoration(
+        //                       borderRadius: BorderRadius.circular(10),
+        //                       color: AppColor.darkOrange,
+        //                       boxShadow: const [
+        //                         BoxShadow(
+        //                           color: AppColor.lightGrey,
+        //                           blurRadius: 25.0, // soften the shadow
+        //                           spreadRadius: 1.0, //extend the shadow
+        //                           offset: Offset(
+        //                             0.0, // Move to right 10  horizontally
+        //                             0.0, // Move to bottom 10 Vertically
+        //                           ),
+        //                         )
+        //                       ],
+        //                     ),
+        //                     child: const Icon(
+        //                       Icons.percent,
+        //                       color: Colors.white,
+        //                     ),
+        //                   ),
+        //                   const Text(
+        //                     "Code TRYNEW applied!",
+        //                     style: TextStyle(
+        //                       fontSize: 16,
+        //                     ),
+        //                   ),
+        //                   const SizedBox(width: 30),
+        //                   const Text(
+        //                     "Remove",
+        //                     style: TextStyle(
+        //                       fontSize: 16, color: Colors.red
+        //                     ),
+        //                   ),
+        //                 ],
+        //               ),
+        //             ],
+        //           ),
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
  
           //End promo code card
 
@@ -280,16 +383,16 @@ appBar:  AppBar(
                     )
                   ],
                 ),
-                child:  const Padding(
-                  padding: EdgeInsets.all(20),
+                child:  Padding(
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      BillDetailsCard(title: 'Total price', price: "2000",),
-                      BillDetailsCard(title: 'Shipping charges', price: "-20",),
-                      BillDetailsCard(title: 'Discount', price: "-20",),
-                     Divider(height: 30, thickness: 2,),
-                      BillDetailsCard(title: 'Total Amount', price: "2,5000",),
+                      BillDetailsCard(title: 'Total price', price: totalPrice.toString(),),
+                      BillDetailsCard(title: 'Shipping fee', price:totalShippingFee.toString(),),
+                      BillDetailsCard(title: 'Service Charges', price: totalServiceCharge.toString(),),
+                    const Divider(height: 30, thickness: 2,),
+                      BillDetailsCard(title: 'Total Amount', price: totalAmount.toString(),),
                     ],
                   ),
                 ),
@@ -304,7 +407,7 @@ appBar:  AppBar(
              child: DefaultButton(
                   text: "Continue",
                   press: () {
-                   Navigator.pushNamed(context, HomeScreen.routeName);
+                    _handlePaymentInitialization(totalAmount);
                   }
               ),
            ),
@@ -337,11 +440,33 @@ final String price;
 }
 
 
-class CartCard extends StatelessWidget {
-  const CartCard({
+// ignore: must_be_immutable
+class CartCard extends StatefulWidget {
+   final String cartImage;
+  final String cartProductName;
+  final String cartProductSize;
+  late int cartProductQuantity;
+  late double cartProductPrice;
+  late double shippingFees;
+  final String cartColor;
+   CartCard({
     super.key,
+    required this.cartImage,
+    required this.cartProductName,
+    required this.cartProductSize,
+    required this.cartProductQuantity,
+    required this.cartProductPrice,
+    required this.shippingFees,
+    required this.cartColor,
   });
 
+  @override
+  State<CartCard> createState() => _CartCardState();
+}
+
+class _CartCardState extends State<CartCard> {
+
+  late double finalTotal = (widget.cartProductPrice*widget.cartProductQuantity)+(widget.shippingFees);
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -371,13 +496,14 @@ class CartCard extends StatelessWidget {
               Container(
                 height: 100,
                 width: 90,
+                clipBehavior: Clip.hardEdge,
                 decoration: const BoxDecoration(
                   color: AppColor.lightGrey,
                   borderRadius: BorderRadius.all(
                     Radius.circular(10),
                   ),
                 ),
-                child: Image.asset("assets/images/beats_studio_3-2.png"),
+                child: Image.network(imageUrl+widget.cartImage, fit: BoxFit.fitHeight,),
               ),
               SizedBox(
                 height: 120,
@@ -385,81 +511,56 @@ class CartCard extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Row(
+                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'No. One HaedPhone',
-                          style: TextStyle(
+                          widget.cartProductName.toString(),
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
                           maxLines: 1,
                         ),
-                        Icon(
-                          Icons.delete_outline,
-                          color: AppColor.darkOrange,
-                        )
+                        // Icon(
+                        //   Icons.delete_outline,
+                        //   color: AppColor.darkOrange,
+                        // )
                       ],
                     ),
-                    const Row(
+                    Row(
                       children: [
-                        Text('Color: Red | Size: XL'),
+                        Text('Color: ${widget.cartColor} | Size: ${widget.cartProductSize}'),
                       ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          '500.00',
-                          style: TextStyle(
-                              fontSize: 18,
-                              color: AppColor.darkOrange,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              splashRadius: 10.0,
-                              onPressed: () {},
-                              icon: Container(
-                                height: 30,
-                                width: 30,
-                                decoration: const BoxDecoration(
-                                    color: AppColor.lightGrey,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(5))),
-                                child: const Icon(
-                                  Icons.remove,
-                                  color: AppColor.darkOrange,
-                                  size: 20,
-                                ),
+                        RichText(
+                      text:  TextSpan(
+                        text: widget.cartProductPrice.toString(),
+                        style: const TextStyle(
+                                                  fontSize: 18,
+                                                  color: AppColor.darkOrange,
+                                                  fontWeight: FontWeight.bold),
+                        children: <TextSpan>[
+                          TextSpan(text: " x ${widget.cartProductQuantity.toString()}", style: const TextStyle(color: Colors.red, fontSize: 12,)),
+                        ],
+                      ),
+                    ),
+                        
+                       Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                finalTotal.toString(),
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18,),
                               ),
-                            ),
-                            const Text(
-                              '2',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            IconButton(
-                              splashRadius: 10.0,
-                              onPressed: () {},
-                              icon: Container(
-                                height: 30,
-                                width: 30,
-                                decoration: const BoxDecoration(
-                                    color: AppColor.lightGrey,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(5))),
-                                child: const Icon(
-                                  Icons.add,
-                                  color: AppColor.darkOrange,
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     )

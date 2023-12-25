@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:bella_banga/error_handling.dart';
 import 'package:bella_banga/src/model/userModel.dart';
+import 'package:bella_banga/src/model/vendorModel.dart';
 import 'package:bella_banga/src/provider/user_provider.dart';
 import 'package:bella_banga/src/utility.dart';
 import 'package:bella_banga/src/view/screen/home_screen.dart';
@@ -217,6 +218,37 @@ void verifyUser({
       print(e);
       // showSnackBar(context, e.toString());
     }
+  }
+
+  //VENDOR SERVICES
+  Future<List<VendorModel>> fetchAllVendors(BuildContext context, int page, int size) async {
+   List<VendorModel> vendorList = [];
+    try {
+      http.Response res =
+          await http.get(Uri.parse('https://service.phopis.com/bellabanga/api/user/get_by_role?role=VENDOR&status=AC&page=$page&size=$size'), 
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      });
+        print(res.body);
+      httpErrorHandle(
+          response: res,
+          context: context,
+          onSuccess: () {
+            for (int i = 0; i < jsonDecode(res.body)['payload']['content'].length; i++) {
+              vendorList.add(
+                VendorModel.fromJson(
+                  jsonEncode(
+                    jsonDecode(res.body)['payload']['content'][i],
+                  ),
+                ),
+              );
+            }
+          });
+    } catch (e) {
+      // showSnackBar(context, e.toString());
+      print(e);
+    }
+    return vendorList;
   }
 
   }

@@ -1,8 +1,15 @@
+import 'package:bella_banga/boxes.dart';
+import 'package:bella_banga/core/app_color.dart';
 import 'package:bella_banga/core/default_button.dart';
+import 'package:bella_banga/src/model/local_storage_model/addtocartmodel.dart';
 import 'package:bella_banga/src/model/productModel.dart';
+import 'package:bella_banga/src/size_config.dart';
+import 'package:bella_banga/src/utility.dart';
+import 'package:bella_banga/src/view/widget/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:bella_banga/src/view/widget/page_wrapper.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 // final ProductController controller = Get.put(ProductController());
 
@@ -40,7 +47,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           bottomLeft: Radius.circular(10),
         ),
       ),
-      // child: CarouselSlider(items: widget.product.images),
+      child: CarouselSlider(items: widget.product.images!.split(',')),
     );
   }
 
@@ -52,7 +59,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       children: [
         RatingBar.builder(
           itemSize: 25,
-          // initialRating: widget.product.rating,
+          initialRating: widget.product.ratings ?? 2,
           direction: Axis.horizontal,
           itemBuilder: (_, __) => const Icon(
             Icons.star,
@@ -85,8 +92,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             // width: controller.isNominal(widget.product) ? 40 : 70,
             decoration: BoxDecoration(
               // color: controller.sizeType(widget.product)[index].isSelected == false
-              //     ? Colors.white
-              //     : AppColor.lightOrange,
+                  // ? Colors.white
+                  // : AppColor.lightOrange,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: Colors.grey, width: 0.4),
             ),
@@ -107,10 +114,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
+
+int productQuantity = 1;
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
+    SizeConfig().init(context);
     return SafeArea(
       child: Scaffold(
         extendBodyBehindAppBar: true,
@@ -128,8 +139,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        // widget.product.name,
-                        '',
+                        widget.product.name.toString(),
                         style: Theme.of(context).textTheme.displayMedium,
                       ),
                       const SizedBox(height: 10),
@@ -137,17 +147,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          // Text(
-                          //   widget.product.off != null
-                          //       ? "\$${widget.product.off}"
-                          //       : "\$${widget.product.price}",
-                          //   style: Theme.of(context).textTheme.displayLarge,
-                          // ),
+                          Text( 
+                            "${widget.product.currencyCode} ${widget.product.price}",
+                            style: Theme.of(context).textTheme.displayLarge,
+                          ),
                           const SizedBox(width: 3),
                           Visibility(
-                            // visible: widget.product.off != null ? true : false,
+                            visible: false,
                             child: Text(
-                              "\$${widget.product.price}",
+                              "${widget.product.currencyCode}${widget.product.price}",
                               style: const TextStyle(
                                 decoration: TextDecoration.lineThrough,
                                 color: Colors.grey,
@@ -156,12 +164,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ),
                           ),
                           const Spacer(),
-                          // Text(
-                          //   product.isAvailable
-                          //       ? "Available in stock"
-                          //       : "Not available",
-                          //   style: const TextStyle(fontWeight: FontWeight.w500),
-                          // )
+                          Text(
+                           widget.product.shippingFees.toString(),
+                            style: const TextStyle(fontWeight: FontWeight.w500, color: AppColor.lightOrange),
+                          )
                         ],
                       ),
                       const SizedBox(height: 30),
@@ -170,28 +176,59 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         style: Theme.of(context).textTheme.headlineMedium,
                       ),
                       const SizedBox(height: 10),
-                      // Text(widget.product.about),
+                      Text(widget.product.description.toString(), textAlign: TextAlign.justify,),
                       const SizedBox(height: 20),
-                      SizedBox(
+                      const SizedBox(
                         height: 40,
-                        // child: GetBuilder<ProductController>(
+                        // child:
                         //   builder: (_) => productSizesListView(),
-                        // ),
+                        
                       ),
                       const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        child: DefaultButton(
-                          text: "Add to cart",
-                          press: (){},
-                        )
-                      )
+                      // SizedBox(
+                      //   width: double.infinity,
+                      //   child: DefaultButton(
+                      //     text: "Add to cart",
+                      //     press: (){},
+                      //   )
+                      // )
                     ],
                   ),
                 )
               ],
             ),
           ),
+        ),
+        bottomNavigationBar: BottomAppBar(
+          padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 6),
+          elevation: 10,
+          surfaceTintColor: Colors.white,
+          shadowColor: AppColor.lightGrey,
+          color: Colors.white,
+          height: 60,
+          child:  
+          SizedBox(
+                        width: double.infinity,
+                        child: DefaultButton(
+                          text: "Add to cart",
+                          press: (){
+                            cartBox.put(
+                              "CartBox_key${widget.product.id}", 
+                              Addtocartmodel(
+                                productName: widget.product.name.toString(), 
+                                productColor: widget.product.colors.toString(), 
+                                productSize: widget.product.sizes.toString(), 
+                                productQuantity: productQuantity,
+                                productPrice: widget.product.price as double,
+                                cartImageUrl: widget.product.images!.split(',')[0].toString(), 
+                                cartShippingFee: widget.product.shippingFees as double, 
+                                cartServiceCharged: widget.product.serviceCharge as double,
+                                ));
+
+                                showSnackBar(context, "${widget.product.name} Added to cart");
+                          },
+                        )
+                      )
         ),
       ),
     );

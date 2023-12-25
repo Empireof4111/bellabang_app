@@ -1,14 +1,19 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:bella_banga/src/view/screen/category_screen.dart';
+import 'package:bella_banga/src/model/vendorModel.dart';
+import 'package:bella_banga/src/services/auth_services.dart';
+import 'package:bella_banga/src/view/screen/product_by_vendor_screen.dart';
+import 'package:bella_banga/src/view/screen/vendor_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'package:bella_banga/core/app_color.dart';
 import 'package:bella_banga/core/app_data.dart';
 import 'package:bella_banga/src/model/categoryModel.dart';
-import 'package:bella_banga/src/provider/user_provider.dart';
+import 'package:bella_banga/src/model/productModel.dart';
 import 'package:bella_banga/src/services/product_services.dart';
 import 'package:bella_banga/src/utility.dart';
+import 'package:bella_banga/src/view/screen/category_screen.dart';
+import 'package:bella_banga/src/view/screen/product_by_category_screen.dart';
+import 'package:bella_banga/src/view/screen/product_detail_screen.dart';
 import 'package:bella_banga/src/view/widget/product_grid_view.dart';
 
 // final Product product = Product();
@@ -22,33 +27,49 @@ class ProductListScreen extends StatefulWidget {
 
 class _ProductListScreenState extends State<ProductListScreen> {
  List<CategoryModel>? categories;
+ List<Product>? product;
+List<VendorModel>? vendorList;
+
 
   final ProductServices productServices = ProductServices();
+  final AuthService authService = AuthService();
+
 
   @override
   void initState() {
     super.initState();
     fetchAllProductCategory();
+    fetchAllProdut();
+    fetchAllVendors();
   }
 
     void fetchAllProductCategory() async {
     categories = await productServices.fetchAllCategory(context);
+    // setState(() {
+    // });
+  }
+
+  void fetchAllProdut() async {
+    product = await productServices.fetchAllUserProducts(context, 0, 20);
     setState(() {
-      // print((categories![0].category!.name));
-      // print((categories!.length));
+      
+    });
+  }
+
+    void fetchAllVendors() async {
+    vendorList = await authService.fetchAllVendors(context, 0, 20);
+    setState(() {
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<UserProvider>(context).user;
     return Scaffold(
-      // extendBodyBehindAppBar: true,
       appBar: _appBar,
       body: SingleChildScrollView(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -78,8 +99,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         Icon(Icons.search),
                       ],
                     );
-                
-                    //end of search ba
                   }, suggestionsBuilder:
                       (BuildContext context, SearchController controller) {
                     return List<ListTile>.generate(5, (int index) {
@@ -93,36 +112,100 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 
                   //end of search bar
                 ),
-                // ignore: avoid_print
-                Text(
-                  user.name!,
-                  style: Theme.of(context).textTheme.displayLarge,
-                ),
-                Text(
-                  "Lets gets somethings?",
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
                 _recommendedProductListView(context),
+                HeaderTitle(seeAll: "SEE ALL", title: "Shop by vendors", press: (){
+                  Navigator.pushNamed(context, VendorScreen.routeName);
+                }),
+                Container(
+  height: 100,
+  color: Colors.transparent,
+  child: ListView.builder(
+    scrollDirection: Axis.horizontal,
+    itemCount: (vendorList == null) ? 0 : vendorList!.length,
+    itemBuilder: (BuildContext ctx, index) {
+      return GestureDetector(
+        child: Container(
+          height: 300,
+          width: 300,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(width: 1, color: AppColor.lightOrange),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset("assets/images/ShopsVendor.png"),
+                SizedBox(
+                  width: 200,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(vendorList![index].businessName.toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                      Text(vendorList![index].businessAddress.toString(), overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+        onTap: (){
+          Navigator.pushNamed(context, ProductByVendorScreen.routeName, arguments: vendorList![index].id);
+        },
+      );
+    },
+  ),
+),
                 HeaderTitle(seeAll: "SEE ALL", title: "Top categories", press: (){
                   Navigator.pushNamed(context, CategoryScreen.routName);
                 }),
                 //TOP CATEGORY
                 Container(
-                  height: 60,
+                  height: 80,
                   color: Colors.transparent,
                  child: GridView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount:categories!.length,
+                  itemCount: (categories == null)? 0 : 4,
                   itemBuilder: (BuildContext ctx, index){
-                  return TopCategoryCard(categoryImage: "$imageUrl${categories![index].category?.imageLink}", press: () {  },);
+                  return TopCategoryCard( categoryName: categories![index].category!.name.toString(), categoryImage: "$imageUrl${categories![index].category?.imageLink}", press: () { 
+                    Navigator.pushNamed(context, ProductByCategoryScreen.routeName, arguments:categories?[index].category!.id);
+                   },);
                  }, gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                mainAxisSpacing: 4.0,
+                                mainAxisSpacing: 1.0,
                                 crossAxisSpacing: 2.0,
                                 crossAxisCount: 1,
                                 childAspectRatio: 1),)
                   ),
-                  const HeaderTitle2(title: "Popular product"),
-               const ProductGridView(),
+
+                  //POPULAR PRODUCT SECTION 
+
+                const HeaderTitle2(title: "Popular product"),
+
+                 Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: GridView.builder(
+                  itemCount: (product == null)? 0 : product!.length,
+                    shrinkWrap: true,
+                    physics: const ScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      childAspectRatio: 10 / 16,
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                    ),
+                    itemBuilder: (_, index) {
+                      return ProductGridView(productImgUrl: "$imageUrl${product![index].thumbnail}", productTitle: product![index].name.toString(), productPrice:  product![index].price as double, press: () { 
+                        Navigator.pushNamed(context, ProductDetailScreen.routeName, arguments: product![index]);
+                       }, currencyType: product![index].currencyCode.toString(),);
+                      
+                    },
+                  ),
+                ),
+               
               ],
             ),
           ),
@@ -144,7 +227,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       preferredSize: const Size.fromHeight(60),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -178,7 +261,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     onTap: (){
                     
                     },
-                    child: const Icon(Icons.favorite)),
+                    child: const Icon(Icons.favorite, color: AppColor.darkOrange,)),
 
                 ],
               ),
@@ -194,7 +277,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     return SizedBox(
       height: 170,
       child: ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 0),
           shrinkWrap: true,
           scrollDirection: Axis.horizontal,
           itemCount: AppData.recommendedProducts.length,
@@ -202,7 +285,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
             return Padding(
               padding: const EdgeInsets.only(right: 20),
               child: Container(
-                width: 315,
+                width: 320,
                 decoration: BoxDecoration(
                   color: AppColor.darkOrange,
                   borderRadius: BorderRadius.circular(15),
@@ -323,10 +406,12 @@ class HeaderTitle2 extends StatelessWidget {
 
 class TopCategoryCard extends StatelessWidget {
   final String categoryImage;
+  final String categoryName;
   final GestureTapCallback press;
   const TopCategoryCard({
     super.key,
     required this.categoryImage,
+    required this.categoryName,
     required this.press,
   });
 
@@ -334,20 +419,31 @@ class TopCategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: press,
-      child: Container(
-        alignment: Alignment.center,
-        height: 60,
-        width: 60,
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColor.lightOrange, width: 1.0),
-        image: DecorationImage(
-          image: NetworkImage(categoryImage), scale: 1.0, fit: BoxFit.contain,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            alignment: Alignment.center,
+            height: 60,
+            width: 60,
+            clipBehavior: Clip.hardEdge,
+            decoration: BoxDecoration(
+              color: Colors.white,
+            borderRadius: BorderRadius.circular(50),
+            // border: Border.all(color: AppColor.lightGrey, width: 1.0),
+            // image: DecorationImage(
+            //   image: NetworkImage(categoryImage), scale: 1.0, fit: BoxFit.contain,
+            //   ),
+            
+            ),
+            child: Image.network(categoryImage,  fit: BoxFit.fitWidth, errorBuilder:
+            (BuildContext context, Object exception, StackTrace? stackTrace) {
+          return Image.asset("assets/images/errorImage.png");
+        },),
           ),
-        ),
-        // child:  Image.network(categoryImage,  scale: 1.0, fit: BoxFit.contain,),
+          Text(categoryName, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),),
+        ],
       ),
     );
   }

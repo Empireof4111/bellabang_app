@@ -1,3 +1,4 @@
+import 'package:bella_banga/src/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:bella_banga/core/app_color.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -32,8 +33,11 @@ class _CarouselSliderState extends State<CarouselSlider> {
             },
             itemBuilder: (_, index) {
               return FittedBox(
-                fit: BoxFit.none,
-                child: Image.asset(widget.items[index], scale: 3),
+                fit: BoxFit.contain,
+                child: Image.network("$imageUrl${widget.items[index]}", scale: 3, errorBuilder:
+            (BuildContext context, Object exception, StackTrace? stackTrace) {
+          return Image.asset("assets/images/errorImage.png");
+        }),
               );
             },
           ),

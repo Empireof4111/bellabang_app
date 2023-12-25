@@ -2,6 +2,7 @@ import 'package:bella_banga/core/app_color.dart';
 import 'package:bella_banga/src/model/categoryModel.dart';
 import 'package:bella_banga/src/services/product_services.dart';
 import 'package:bella_banga/src/utility.dart';
+import 'package:bella_banga/src/view/screen/product_by_category_screen.dart';
 import 'package:flutter/material.dart';
 
 class CategoryScreen extends StatefulWidget {
@@ -35,10 +36,8 @@ List<CategoryModel>? categories;
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Category",
-          style: Theme.of(context).textTheme.displayLarge,
-        ),
+        backgroundColor: AppColor.lightOrange,
+        title: const Text('Categories', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -57,9 +56,15 @@ List<CategoryModel>? categories;
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                child: CategoryCard(cartName: "${categories![index].category!.name}", cartType: "${categories![index].category!.type}", image: "$imageUrl${categories![index].category!.imageLink}", press: () {  },),
+                child: CategoryCard(
+                  cartName: "${categories![index].category!.name}", 
+                  cartType: "${categories![index].category!.type}",
+                  image: "$imageUrl${categories![index].category!.imageLink}", 
+                  press: () { 
+                    Navigator.pushNamed(context,  arguments: categories![index].category?.id, ProductByCategoryScreen.routeName);
+                   },),
               ),
-            ),
+            ),  
          );
           }
         ),

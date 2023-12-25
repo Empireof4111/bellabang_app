@@ -12,22 +12,6 @@ class OnBoardingScreen extends StatefulWidget {
 
 class _OnBoardingScreenState extends State<OnBoardingScreen> {
   //testing product
-  // List<CategoryModel>? categoryById;
-  // final ProductServices productServices = ProductServices();
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   fetchUserProduct();
-  // }
-
-  //   void fetchUserProduct() async {
-  //   categoryById = await productServices.fetchProductCategoryById(context, 2);
-  //   setState(() {
-  //     print((categoryById![0].subCategories![0].toJson()));
-  //   });
-  // }
-
   final PageController _controller = PageController();
   bool onLastPage = false;
   @override

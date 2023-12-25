@@ -41,6 +41,67 @@ Future<List<Product>> fetchAllUserProducts(BuildContext context, int page, int s
     return userProductList;
   }
 
+//FETCHING ALL BY CATEGORY ID
+Future<List<Product>> fetchAllProductsByCategory(BuildContext context, int categoryId, int page, int size) async {
+    List<Product> userProductList = [];
+    try {
+      http.Response res =
+          await http.get(Uri.parse('https://service.phopis.com/bellabanga/api/product/get_by_category_id/$categoryId?page=$page&size=$size'), 
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      });
+        // print(res.body);
+      httpErrorHandle(
+          response: res,
+          context: context,
+          onSuccess: () {
+            for (int i = 0; i < jsonDecode(res.body)['payload']['content'].length; i++) {
+              userProductList.add(
+                Product.fromJson(
+                  jsonEncode(
+                    jsonDecode(res.body)['payload']['content'][i],
+                  ),
+                ),
+              );
+            }
+          });
+    } catch (e) {
+      // showSnackBar(context, e.toString());
+      print(e);
+    }
+    return userProductList;
+  }
+
+//FETCH ALL PRODUCT BY VENDOR ID
+  Future<List<Product>> fetchAllProductsByVendorId(BuildContext context, int vendorId, int page, int size) async {
+    List<Product> vendorProductList = [];
+    try {
+      http.Response res =
+          await http.get(Uri.parse('https://service.phopis.com/bellabanga/api/product/get_all_by_vendor/$vendorId?page=$page&size=$size'), 
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      });
+        print(res.body);
+      httpErrorHandle(
+          response: res,
+          context: context,
+          onSuccess: () {
+            for (int i = 0; i < jsonDecode(res.body)['payload']['content'].length; i++) {
+              vendorProductList.add(
+                Product.fromJson(
+                  jsonEncode(
+                    jsonDecode(res.body)['payload']['content'][i],
+                  ),
+                ),
+              );
+            }
+          });
+    } catch (e) {
+      // showSnackBar(context, e.toString());
+      print(e);
+    }
+    return vendorProductList;
+  }
 
 //FETCHING ALL CATEGORY
 Future<List<CategoryModel>> fetchAllCategory(BuildContext context) async {
@@ -96,7 +157,8 @@ Future<List<CategoryModel>> fetchProductCategoryById(BuildContext context, int i
               );
           });
     } catch (e) {
-      showSnackBar(context, e.toString());
+      // showSnackBar(context, e.toString());
+      print(e);
     }
     return productCategoryById;
   }

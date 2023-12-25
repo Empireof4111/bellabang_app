@@ -6,151 +6,152 @@
 // import 'package:bella_banga/src/model/product_category.dart';
 // import 'package:bella_banga/src/model/product_size_type.dart';
 
+// import 'package:bella_banga/src/model/productModel.dart';
+// import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+
 // class ProductController extends GetxController {
-//   List<Product> allProducts = AppData.products;
-//   RxList<Product> filteredProducts = AppData.products.obs;
-//   RxList<Product> cartProducts = <Product>[].obs;
-//   RxList<ProductCategory> categories = AppData.categories.obs;
-//   RxInt totalPrice = 0.obs;
+//  List<Product>? product;
 
-//   void filterItemsByCategory(int index) {
-//     for (ProductCategory element in categories) {
-//       element.isSelected = false;
-//     }
-//     categories[index].isSelected = true;
 
-//     if (categories[index].type == ProductType.all) {
-//       filteredProducts.assignAll(allProducts);
-//     } else {
-//       filteredProducts.assignAll(allProducts.where((item) {
-//         return item.type == categories[index].type;
-//       }).toList());
-//     }
-//     update();
-//   }
 
-//   void isFavorite(int index) {
-//     filteredProducts[index].isFavorite = !filteredProducts[index].isFavorite;
-//     update();
-//   }
+  // void filterItemsByCategory(int index) {
+  //   for (ProductCategory element in categories) {
+  //     element.isSelected = false;
+  //   }
+  //   categories[index].isSelected = true;
 
-//   void addToCart(Product product) {
-//     product.quantity++;
-//     cartProducts.add(product);
-//     cartProducts.assignAll(cartProducts);
-//     calculateTotalPrice();
-//   }
+  //   if (categories[index].type == ProductType.all) {
+  //     filteredProducts.assignAll(allProducts);
+  //   } else {
+  //     filteredProducts.assignAll(allProducts.where((item) {
+  //       return item.type == categories[index].type;
+  //     }).toList());
+  //   }
+  //   update();
+  // }
 
-//   void increaseItemQuantity(Product product) {
-//     product.quantity++;
-//     calculateTotalPrice();
-//     update();
-//   }
+  // void isFavorite(int index) {
+  //   filteredProducts[index].isFavorite = !filteredProducts[index].isFavorite;
+  //   update();
+  // }
 
-//   void decreaseItemQuantity(Product product) {
-//     product.quantity--;
-//     calculateTotalPrice();
-//     update();
-//   }
+  // void addToCart(Product product) {
+  //   product.quantity++;
+  //   cartProducts.add(product);
+  //   cartProducts.assignAll(cartProducts);
+  //   calculateTotalPrice();
+  // }
 
-//   bool isPriceOff(Product product) => product.off != null;
+  // void increaseItemQuantity(Product product) {
+  //   product.quantity++;
+  //   calculateTotalPrice();
+  //   update();
+  // }
 
-//   bool get isEmptyCart => cartProducts.isEmpty;
+  // void decreaseItemQuantity(Product product) {
+  //   product.quantity--;
+  //   calculateTotalPrice();
+  //   update();
+  // }
 
-//   bool isNominal(Product product) => product.sizes?.numerical != null;
+  // bool isPriceOff(Product product) => product.off != null;
 
-//   void calculateTotalPrice() {
-//     totalPrice.value = 0;
-//     for (var element in cartProducts) {
-//       if (isPriceOff(element)) {
-//         totalPrice.value += element.quantity * element.off!;
-//       } else {
-//         totalPrice.value += element.quantity * element.price;
-//       }
-//     }
-//   }
+  // bool get isEmptyCart => cartProducts.isEmpty;
 
-//   getFavoriteItems() {
-//     filteredProducts.assignAll(
-//       allProducts.where((item) => item.isFavorite),
-//     );
-//   }
+  // bool isNominal(Product product) => product.sizes?.numerical != null;
 
-//   getCartItems() {
-//     cartProducts.assignAll(
-//       allProducts.where((item) => item.quantity > 0),
-//     );
-//   }
+  // void calculateTotalPrice() {
+  //   totalPrice.value = 0;
+  //   for (var element in cartProducts) {
+  //     if (isPriceOff(element)) {
+  //       totalPrice.value += element.quantity * element.off!;
+  //     } else {
+  //       totalPrice.value += element.quantity * element.price;
+  //     }
+  //   }
+  // }
 
-//   getAllItems() {
-//     filteredProducts.assignAll(allProducts);
-//   }
+  // getFavoriteItems() {
+  //   filteredProducts.assignAll(
+  //     allProducts.where((item) => item.isFavorite),
+  //   );
+  // }
 
-//   List<Numerical> sizeType(Product product) {
-//     ProductSizeType? productSize = product.sizes;
-//     List<Numerical> numericalList = [];
+  // getCartItems() {
+  //   cartProducts.assignAll(
+  //     allProducts.where((item) => item.quantity > 0),
+  //   );
+  // }
 
-//     if (productSize?.numerical != null) {
-//       for (var element in productSize!.numerical!) {
-//         numericalList.add(Numerical(element.numerical, element.isSelected));
-//       }
-//     }
+  // getAllItems() {
+  //   filteredProducts.assignAll(allProducts);
+  // }
 
-//     if (productSize?.categorical != null) {
-//       for (var element in productSize!.categorical!) {
-//         numericalList.add(
-//           Numerical(
-//             element.categorical.name,
-//             element.isSelected,
-//           ),
-//         );
-//       }
-//     }
+  // List<Numerical> sizeType(Product product) {
+  //   ProductSizeType? productSize = product.sizes;
+  //   List<Numerical> numericalList = [];
 
-//     return numericalList;
-//   }
+  //   if (productSize?.numerical != null) {
+  //     for (var element in productSize!.numerical!) {
+  //       numericalList.add(Numerical(element.numerical, element.isSelected));
+  //     }
+  //   }
 
-//   void switchBetweenProductSizes(Product product, int index) {
-//     sizeType(product).forEach((element) {
-//       element.isSelected = false;
-//     });
+  //   if (productSize?.categorical != null) {
+  //     for (var element in productSize!.categorical!) {
+  //       numericalList.add(
+  //         Numerical(
+  //           element.categorical.name,
+  //           element.isSelected,
+  //         ),
+  //       );
+  //     }
+  //   }
 
-//     if (product.sizes?.categorical != null) {
-//       for (var element in product.sizes!.categorical!) {
-//         element.isSelected = false;
-//       }
+  //   return numericalList;
+  // }
 
-//       product.sizes?.categorical![index].isSelected = true;
-//     }
+  // void switchBetweenProductSizes(Product product, int index) {
+  //   sizeType(product).forEach((element) {
+  //     element.isSelected = false;
+  //   });
 
-//     if (product.sizes?.numerical != null) {
-//       for (var element in product.sizes!.numerical!) {
-//         element.isSelected = false;
-//       }
+  //   if (product.sizes?.categorical != null) {
+  //     for (var element in product.sizes!.categorical!) {
+  //       element.isSelected = false;
+  //     }
 
-//       product.sizes?.numerical![index].isSelected = true;
-//     }
+  //     product.sizes?.categorical![index].isSelected = true;
+  //   }
 
-//     update();
-//   }
+  //   if (product.sizes?.numerical != null) {
+  //     for (var element in product.sizes!.numerical!) {
+  //       element.isSelected = false;
+  //     }
 
-//   String getCurrentSize(Product product) {
-//     String currentSize = "";
-//     if (product.sizes?.categorical != null) {
-//       for (var element in product.sizes!.categorical!) {
-//         if (element.isSelected) {
-//           currentSize = "Size: ${element.categorical.name}";
-//         }
-//       }
-//     }
+  //     product.sizes?.numerical![index].isSelected = true;
+  //   }
 
-//     if (product.sizes?.numerical != null) {
-//       for (var element in product.sizes!.numerical!) {
-//         if (element.isSelected) {
-//           currentSize = "Size: ${element.numerical}";
-//         }
-//       }
-//     }
-//     return currentSize;
-//   }
+  //   update();
+  // }
+
+  // String getCurrentSize(Product product) {
+  //   String currentSize = "";
+  //   if (product.sizes?.categorical != null) {
+  //     for (var element in product.sizes!.categorical!) {
+  //       if (element.isSelected) {
+  //         currentSize = "Size: ${element.categorical.name}";
+  //       }
+  //     }
+  //   }
+
+  //   if (product.sizes?.numerical != null) {
+  //     for (var element in product.sizes!.numerical!) {
+  //       if (element.isSelected) {
+  //         currentSize = "Size: ${element.numerical}";
+  //       }
+  //     }
+  //   }
+  //   return currentSize;
+  // }
 // }

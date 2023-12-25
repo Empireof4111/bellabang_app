@@ -1,37 +1,91 @@
-import 'package:bella_banga/core/app_color.dart';
-import 'package:bella_banga/src/view/screen/checkout_screen.dart';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
-class CartScreen extends StatelessWidget {
+import 'package:bella_banga/boxes.dart';
+import 'package:bella_banga/core/app_color.dart';
+import 'package:bella_banga/src/model/local_storage_model/addtocartmodel.dart';
+import 'package:bella_banga/src/utility.dart';
+import 'package:bella_banga/src/view/screen/checkout_screen.dart';
+
+class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
 
-  static const String routName = "/Cart_Screen";
+  static const String routeName = "/Cart_Screen";
 
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+
+// ignore: library_private_types_in_public_api
+final GlobalKey<_CheckOutSectionState> checkoutSectionKey =
+    GlobalKey<_CheckOutSectionState>();
+
+
+class _CartScreenState extends State<CartScreen> {
   PreferredSizeWidget _appBar(BuildContext context) {
     return AppBar(
-      title: Text(
-        "My cart",
-        style: Theme.of(context).textTheme.displayLarge,
-      ),
+      backgroundColor: AppColor.lightOrange,
+        title: const Text('My cart', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
     );
   }
 
+late double total = 0.0;
+void calculateTotalPrice() {
+    double totalPrice = 0.0;
+    for (int index = 0; index < cartBox.length; index++) {
+      Addtocartmodel addtocartmodel = cartBox.getAt(index);
+      totalPrice += addtocartmodel.productPrice * addtocartmodel.productQuantity;
+      totalPrice += addtocartmodel.cartShippingFee; // Add shipping fee
+    }
+
+    setState(() {
+      total = totalPrice;
+    });
+
+      // Update CheckOutSection total
+   checkoutSectionKey.currentState?.updateTotal(total);
+  }
+
+
+  
+
+
   @override
   Widget build(BuildContext context) {
+    calculateTotalPrice();
     return Scaffold(
       appBar: _appBar(context),
-      body: const SingleChildScrollView(
+      body:  SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
-            CartCard(),
-            CartCard(),
-            CartCard(),
-            CartCard(),
-            CheckOutSection(),
+            SizedBox(
+              height: 500,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: cartBox.length,  itemBuilder: (context, index){
+                Addtocartmodel addtocartmodel = cartBox.getAt(index);
+            return CartCard(
+                cartImage: addtocartmodel.cartImageUrl, 
+                cartProductName: addtocartmodel.productName, 
+                cartColor: addtocartmodel.productColor, 
+                cartProductSize: addtocartmodel.productSize, 
+                cartProductPrice: addtocartmodel.productPrice, 
+                total: total,
+                cartProductQuantity: addtocartmodel.productQuantity, press: () { setState((){
+                cartBox.deleteAt(index);
+                });}, shippingFees: addtocartmodel.cartShippingFee,
+                );
+              }),
+            ),
+            
+            CheckOutSection(totalPrice: total,  key: checkoutSectionKey,),
           ],
         ),
       ),
@@ -39,10 +93,90 @@ class CartScreen extends StatelessWidget {
   }
 }
 
-class CartCard extends StatelessWidget {
-  const CartCard({
+
+// ignore: must_be_immutable
+class CartCard extends StatefulWidget {
+  final String cartImage;
+  final String cartProductName;
+  final String cartProductSize;
+  late int cartProductQuantity;
+  late double cartProductPrice;
+  late double shippingFees;
+  late double total;
+  final String cartColor;
+  final GestureTapCallback press;
+  CartCard({
     super.key,
+    required this.cartImage,
+    required this.cartProductName,
+    required this.cartProductSize,
+    required this.cartProductQuantity,
+    required this.cartProductPrice,
+    required this.cartColor,
+    required this.press,
+    required this.shippingFees,
+    required this.total,
   });
+
+  @override
+  State<CartCard> createState() => _CartCardState();
+}
+
+class _CartCardState extends State<CartCard> {
+
+
+   // Function to decrease quantity
+  void decreaseQuantity() {
+    if (widget.cartProductQuantity > 1) {
+      setState(() {
+        widget.cartProductQuantity -= 1;
+      });
+      updateCartBox();
+       calculateTotalPrice();
+    }
+  }
+
+    // Function to increase quantity
+  void increaseQuantity() {
+    setState(() {
+      widget.cartProductQuantity += 1;
+    });
+    updateCartBox();
+     calculateTotalPrice();
+  }
+
+  // Function to update cartBox with the new quantity
+  void updateCartBox() {
+    int index = cartBox.values.toList().indexWhere(
+        (element) => element.productName == widget.cartProductName &&
+                      element.productSize == widget.cartProductSize &&
+                      element.productColor == widget.cartColor);
+
+    if (index != -1) {
+      // Update quantity in the cartBox
+      Addtocartmodel updatedCartItem = cartBox.getAt(index)!;
+      updatedCartItem.productQuantity = widget.cartProductQuantity;
+      cartBox.putAt(index, updatedCartItem);
+    }
+  }
+  
+// Function to calculate the total price
+  void calculateTotalPrice() {
+    double totalPrice = 0.0;
+    for (int index = 0; index < cartBox.length; index++) {
+      Addtocartmodel addtocartmodel = cartBox.getAt(index);
+      totalPrice += addtocartmodel.productPrice * addtocartmodel.productQuantity;
+      totalPrice += addtocartmodel.cartShippingFee; // Add shipping fee
+    }
+
+    setState(() {
+      widget.total = totalPrice;
+    });
+      // Update CheckOutSection total
+  checkoutSectionKey.currentState?.updateTotal(widget.total);
+
+  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -73,13 +207,14 @@ class CartCard extends StatelessWidget {
               Container(
                 height: 100,
                 width: 90,
+                clipBehavior: Clip.hardEdge,
                 decoration: const BoxDecoration(
-                  color: AppColor.lightGrey,
+                  color: Colors.white,
                   borderRadius: BorderRadius.all(
                     Radius.circular(10),
                   ),
                 ),
-                child: Image.asset("assets/images/beats_studio_3-2.png"),
+                child: Image.network(imageUrl+widget.cartImage, fit: BoxFit.fitHeight,),
               ),
               SizedBox(
                 height: 120,
@@ -87,34 +222,37 @@ class CartCard extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'No. One HaedPhone',
-                          style: TextStyle(
+                          widget.cartProductName,
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
                           maxLines: 1,
                         ),
-                        Icon(
-                          Icons.delete_outline,
-                          color: AppColor.darkOrange,
-                        )
+                        GestureDetector(
+                          onTap: widget.press,
+                          child: const Icon(
+                            Icons.delete_outline,
+                            color: AppColor.darkOrange,
+                          ),
+                        ),
                       ],
                     ),
-                    const Row(
+                    Row(
                       children: [
-                        Text('Color: Red | Size: XL'),
+                        Text('Color: ${widget.cartColor} | Size: ${widget.cartProductSize}'),
                       ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          '500.00',
-                          style: TextStyle(
+                        Text(
+                          widget.cartProductPrice.toString(),
+                          style: const TextStyle(
                               fontSize: 18,
                               color: AppColor.darkOrange,
                               fontWeight: FontWeight.bold),
@@ -125,7 +263,7 @@ class CartCard extends StatelessWidget {
                           children: [
                             IconButton(
                               splashRadius: 10.0,
-                              onPressed: () {},
+                              onPressed: decreaseQuantity,
                               icon: Container(
                                 height: 30,
                                 width: 30,
@@ -140,13 +278,13 @@ class CartCard extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text(
-                              '2',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                            Text(
+                              widget.cartProductQuantity.toString(),
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             IconButton(
                               splashRadius: 10.0,
-                              onPressed: () {},
+                              onPressed: increaseQuantity,
                               icon: Container(
                                 height: 30,
                                 width: 30,
@@ -176,13 +314,35 @@ class CartCard extends StatelessWidget {
   }
 }
 
-class CheckOutSection extends StatelessWidget {
-  const CheckOutSection({
+// ignore: must_be_immutable
+class CheckOutSection extends StatefulWidget {
+  late double totalPrice;
+   CheckOutSection({
     super.key,
+    required this.totalPrice,
   });
 
+
+
+  @override
+  State<CheckOutSection> createState() => _CheckOutSectionState();
+}
+
+
+
+
+class _CheckOutSectionState extends State<CheckOutSection> {
+
+  void updateTotal(double newTotal) {
+    setState(() {
+      widget.totalPrice = newTotal;
+    });
+  }
   @override
   Widget build(BuildContext context) {
+    
+    // Update CheckOutSection total
+  checkoutSectionKey.currentState?.updateTotal(widget.totalPrice);
     return Padding(
       padding: const EdgeInsets.only(
         top: 5,
@@ -211,18 +371,18 @@ class CheckOutSection extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Column(
+             Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       'Total Price',
                       style: TextStyle(color: AppColor.darkGrey),
                     ),
                     Text(
-                      '5000.0',
+                      widget.totalPrice.toString(),
                       style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   ]),
               ElevatedButton(

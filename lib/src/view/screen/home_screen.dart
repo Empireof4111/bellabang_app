@@ -25,7 +25,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int newIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     return PageWrapper(

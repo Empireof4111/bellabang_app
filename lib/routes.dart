@@ -1,12 +1,19 @@
+
+import 'package:bella_banga/src/model/productModel.dart';
 import 'package:bella_banga/src/view/screen/cart_screen.dart';
 import 'package:bella_banga/src/view/screen/category_screen.dart';
+import 'package:bella_banga/src/view/screen/checkout_screen.dart';
 import 'package:bella_banga/src/view/screen/forgot_password_screen.dart';
 import 'package:bella_banga/src/view/screen/home_screen.dart';
 import 'package:bella_banga/src/view/screen/login_screen.dart';
 import 'package:bella_banga/src/view/screen/onboarding_screen.dart';
 import 'package:bella_banga/src/view/screen/otp_screen.dart';
+import 'package:bella_banga/src/view/screen/product_by_category_screen.dart';
+import 'package:bella_banga/src/view/screen/product_by_vendor_screen.dart';
+import 'package:bella_banga/src/view/screen/product_detail_screen.dart';
 import 'package:bella_banga/src/view/screen/profile_screen.dart';
 import 'package:bella_banga/src/view/screen/sign_up_screen.dart';
+import 'package:bella_banga/src/view/screen/vendor_screen.dart';
 import 'package:flutter/material.dart';
 
 Route<dynamic> generateRoute(RouteSettings routeSettings) {
@@ -24,7 +31,7 @@ Route<dynamic> generateRoute(RouteSettings routeSettings) {
     case ForgotPasswordScreen.routeName:
       return MaterialPageRoute(
         settings: routeSettings,
-        builder: (_) => ForgotPasswordScreen(),
+        builder: (_) => const ForgotPasswordScreen(),
       );
     case SignUpScreen.routeName:
       return MaterialPageRoute(
@@ -36,21 +43,42 @@ Route<dynamic> generateRoute(RouteSettings routeSettings) {
         settings: routeSettings,
         builder: (context) => const HomeScreen(),
       );
-    case CartScreen.routName:
+    case CartScreen.routeName:
       return MaterialPageRoute(
         settings: routeSettings,
         builder: (_) => const CartScreen(),
+      );
+      case CheckoutScreen.routeName:
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) => const CheckoutScreen(),
       );
       case CategoryScreen.routName:
       return MaterialPageRoute(
         settings:  routeSettings,
         builder: (_)=> const CategoryScreen(),);
-    // case ProductDetailScreen.routeName:
-    // var product = routeSettings.arguments as Product;
-    //   return MaterialPageRoute(
-    //     settings: routeSettings,
-    //     builder: (_) =>  ProductDetailScreen(product),
-    //   );
+        case VendorScreen.routeName:
+      return MaterialPageRoute(
+        settings:  routeSettings,
+        builder: (_)=> const VendorScreen(),);
+         case ProductByVendorScreen.routeName:
+         int vendorId = routeSettings.arguments as int;
+      return MaterialPageRoute(
+        settings:  routeSettings,
+        builder: (_)=>  ProductByVendorScreen(vendorId: vendorId,)
+        );
+         case ProductByCategoryScreen.routeName:
+    var categoryId = routeSettings.arguments as int;
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) =>  ProductByCategoryScreen(categoryId: categoryId),
+      );
+    case ProductDetailScreen.routeName:
+    var product = routeSettings.arguments as Product;
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) =>  ProductDetailScreen(product),
+      );
     case ProfileScreen.routeName:
       return MaterialPageRoute(
         settings: routeSettings,

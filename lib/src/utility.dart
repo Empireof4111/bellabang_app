@@ -50,3 +50,4 @@ String basedUrl ="https://service.phopis.com/bellabanga";
 
 //IMAGE FILE URL
 String imageUrl = "https://sauki-storage.s3.amazonaws.com/pictures/";
+

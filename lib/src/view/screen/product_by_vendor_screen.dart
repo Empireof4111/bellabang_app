@@ -1,0 +1,78 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:bella_banga/core/app_color.dart';
+import 'package:bella_banga/src/utility.dart';
+import 'package:bella_banga/src/view/screen/product_detail_screen.dart';
+import 'package:bella_banga/src/view/widget/product_grid_view.dart';
+import 'package:flutter/material.dart';
+
+import 'package:bella_banga/src/model/productModel.dart';
+import 'package:bella_banga/src/services/product_services.dart';
+
+class ProductByVendorScreen extends StatefulWidget {
+  final int vendorId;
+  const ProductByVendorScreen({
+    super.key,
+    required this.vendorId,
+  });
+  static const String routeName = "/prodcut-by-vendor-id";
+
+
+  @override
+  State<ProductByVendorScreen> createState() => _ProductByVendorScreenState();
+}
+
+class _ProductByVendorScreenState extends State<ProductByVendorScreen> {
+
+    List<Product>? product;
+final ProductServices productServices = ProductServices();
+
+
+ @override
+  void initState() {
+    super.initState();
+    fetchAllProductCategoryById();
+  }
+
+   int page = 0;
+ int size = 20;
+
+    void fetchAllProductCategoryById() async {
+    product = await productServices.fetchAllProductsByVendorId(context, widget.vendorId, page, size);
+    setState(() {
+      
+    });
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+         foregroundColor: Colors.white,
+        backgroundColor: AppColor.lightOrange,
+        title: Text(product?[0].vendorName.toString() ?? 'Shop by....', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+      ),
+
+      body: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: GridView.builder(
+                  itemCount: (product == null) ? 0 : product!.length,
+                    shrinkWrap: true,
+                    physics: const ScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      childAspectRatio: 10 / 16,
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                    ),
+                    itemBuilder: (_, index) {
+                      return ProductGridView(productImgUrl: "$imageUrl${product![index].thumbnail}", productTitle: product![index].name.toString(), productPrice:  product![index].price as double, press: () { 
+                        Navigator.pushNamed(context, ProductDetailScreen.routeName, arguments: product![index]);
+                       }, currencyType: product![index].currencyCode.toString(),);
+                      
+                    },
+                  ),
+                ),
+    );
+  }
+}

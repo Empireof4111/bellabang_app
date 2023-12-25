@@ -1,9 +1,21 @@
-import 'package:bella_banga/core/app_color.dart';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 
+import 'package:bella_banga/core/app_color.dart';
+
 class ProductGridView extends StatelessWidget {
+  final String productImgUrl;
+  final String productTitle;
+  final String currencyType;
+  final double productPrice;
+  final GestureTapCallback press;
   const ProductGridView({
     super.key,
+    required this.productImgUrl,
+    required this.productTitle,
+    required this.currencyType,
+    required this.productPrice,
+    required this.press,
   });
 
   Widget _gridItemHeader() {
@@ -23,7 +35,7 @@ class ProductGridView extends StatelessWidget {
               height: 30,
               alignment: Alignment.center,
               child: const Text(
-                "30% OFF",
+                "20% OFF",
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
@@ -34,30 +46,49 @@ class ProductGridView extends StatelessWidget {
           IconButton(
             icon: const Icon(
               Icons.favorite,
-              color: Colors.red,
-              // color: items[index].isFavorite
-              //     ? Colors.redAccent
-              //     : const Color(0xFFA6A3A0),
+              color: AppColor.lightOrange,
             ),
-            onPressed: () => {}
+            onPressed: () => {
+              // color: 
+            }
           ),
         ],
       ),
     );
   }
 
-  Widget _gridItemBody() {
+  Widget _gridItemBody( String productImgUrl) {
     return Container(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(0),
       decoration: BoxDecoration(
         color: const Color(0xFFE5E6E8),
         borderRadius: BorderRadius.circular(5),
+        // border: Border.all(width: 0.5, color: AppColor.lightGrey),
+        boxShadow: const [
+            BoxShadow(
+              color: AppColor.lightGrey,
+              blurRadius: 10.0, // soften the shadow
+              spreadRadius: 0.02, //extend the shadow
+              offset: Offset(
+                0.0, // Move to right 10  horizontally
+                0.0, // Move to bottom 10 Vertically
+              ),
+            )
+          ],
       ),
-      child: Image.asset('assets/images/tab_s7_fe_2.png', scale: 3, fit: BoxFit.fill,),
+      
+      clipBehavior: Clip.hardEdge,
+      child: Image.network(productImgUrl,  fit: BoxFit.fitHeight,  errorBuilder:
+            (BuildContext context, Object exception, StackTrace? stackTrace) {
+          return Image.asset("assets/images/errorImage.png");
+        },),
     );
   }
 
-  Widget _gridItemFooter(BuildContext context) {
+  Widget _gridItemFooter(BuildContext context, double productPrice, String productTitle) {
+    double percentage = 0.2;
+    double discountPrice = percentage * productPrice; 
+    double actualPrice = productPrice + discountPrice;
     return Padding(
       padding: const EdgeInsets.all(0),
       child: Container(
@@ -68,44 +99,53 @@ class ProductGridView extends StatelessWidget {
           borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(5),
             bottomRight: Radius.circular(5),
-          ),
-        ),
-        child: const Column(
+          ),   
+               ),
+        child:  Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             FittedBox(
               clipBehavior: Clip.hardEdge,
               child: Text(
-                'Samsung Tablet',
+                productTitle,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.w500,
                   color: Colors.grey,
                 ),
               ),
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Row(
               children: [
+                Text(
+                    currencyType.toString(),
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    )),
               Text(
-                         "200",
-                    style: TextStyle(
-                      color: AppColor.darkOrange,
+                    productPrice.toString(),
+                    style: const TextStyle(
+                      color: Colors.red,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     )),
-                SizedBox(width: 3),
+                const SizedBox(width: 3),
                 Visibility(
                   visible: true,
                   child: Text(
-                    "300",
-                    style: TextStyle(
+                    actualPrice.toString(),
+                    style: const TextStyle(
                       decoration: TextDecoration.lineThrough,
                       color: Colors.grey,
                       fontWeight: FontWeight.w500,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 )
               ],
@@ -118,27 +158,13 @@ class ProductGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: GridView.builder(
-       itemCount: 4,
-        shrinkWrap: true,
-        physics: const ScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          childAspectRatio: 10 / 16,
-          crossAxisCount: 2,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-        ),
-        itemBuilder: (_, index) {
-          return GridTile(
-              header: _gridItemHeader(),
-              footer: _gridItemFooter(context),
-              child: _gridItemBody(),
-            );
-          
-        },
-      ),
+    return GestureDetector(
+      onTap: press,
+      child: GridTile(
+               header: _gridItemHeader(),
+               footer: _gridItemFooter(context, productPrice, productTitle),
+               child: _gridItemBody(productImgUrl),
+             ),
     );
   }
 }
