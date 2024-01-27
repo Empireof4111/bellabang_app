@@ -1,4 +1,4 @@
-import 'package:bella_banga/src/size_config.dart';
+import 'package:bella_banga/core/size_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 

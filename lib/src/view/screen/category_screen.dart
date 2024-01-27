@@ -1,7 +1,7 @@
 import 'package:bella_banga/core/app_color.dart';
 import 'package:bella_banga/src/model/categoryModel.dart';
 import 'package:bella_banga/src/services/product_services.dart';
-import 'package:bella_banga/src/utility.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:bella_banga/src/view/screen/product_by_category_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +39,7 @@ List<CategoryModel>? categories;
         backgroundColor: AppColor.lightOrange,
         title: const Text('Categories', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
       ),
-      body: Padding(
+      body: categories == null ? const Center(child: MyProgressor(),) : Padding(
         padding: const EdgeInsets.all(20),
         child: ListView.builder(
           itemCount: (categories == null)? 0 : categories!.length ,

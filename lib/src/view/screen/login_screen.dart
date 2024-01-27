@@ -8,9 +8,8 @@ import 'package:bella_banga/core/form_error.dart';
 import 'package:bella_banga/core/keyboard.dart';
 import 'package:bella_banga/core/social_card.dart';
 import 'package:bella_banga/src/services/auth_services.dart';
-import 'package:bella_banga/src/size_config.dart';
+import 'package:bella_banga/core/size_config.dart';
 import 'package:bella_banga/src/view/screen/forgot_password_screen.dart';
-import 'package:bella_banga/src/view/screen/home_screen.dart';
 import 'package:bella_banga/src/view/screen/sign_up_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -199,8 +198,8 @@ class _LoginScreenState extends State<LoginScreen> {
                    setState(() {
                     isLoading = true;
                   });
-                  // SignIn();
-                  Navigator.pushNamed(context, HomeScreen.routeName);
+                  SignIn();
+                  // Navigator.pushNamed(context, HomeScreen.routeName);
                   await Future.delayed(const Duration(seconds: 3));
                   setState(() {
                     isLoading = false;

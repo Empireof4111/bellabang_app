@@ -1,13 +1,19 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:ui';
+// ignore_for_file: public_member_api_docs, sort_constructors_first, use_build_context_synchronously
 
+import 'package:bella_banga/core/default_button.dart';
+import 'package:bella_banga/src/provider/user_provider.dart';
+import 'package:bella_banga/src/view/screen/home_screen.dart';
+import 'package:bella_banga/src/view/screen/login_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bella_banga/boxes.dart';
 import 'package:bella_banga/core/app_color.dart';
 import 'package:bella_banga/src/model/local_storage_model/addtocartmodel.dart';
-import 'package:bella_banga/src/utility.dart';
+import 'package:bella_banga/src/services/currency_converter_services.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:bella_banga/src/view/screen/checkout_screen.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -23,6 +29,8 @@ class CartScreen extends StatefulWidget {
 final GlobalKey<_CheckOutSectionState> checkoutSectionKey =
     GlobalKey<_CheckOutSectionState>();
 
+  List<Map<String, dynamic>> newExchangeRates = [];
+  String currencyProductCode = "USD";
 
 class _CartScreenState extends State<CartScreen> {
   PreferredSizeWidget _appBar(BuildContext context) {
@@ -39,6 +47,7 @@ void calculateTotalPrice() {
       Addtocartmodel addtocartmodel = cartBox.getAt(index);
       totalPrice += addtocartmodel.productPrice * addtocartmodel.productQuantity;
       totalPrice += addtocartmodel.cartShippingFee; // Add shipping fee
+      currencyProductCode = addtocartmodel.cartCurrencyCode.toString();
     }
 
     setState(() {
@@ -52,26 +61,42 @@ void calculateTotalPrice() {
 
   
 
+  @override
+  void initState(){
+    super.initState();
+    fetchAllFxRate();
+    calculateTotalPrice();
+  }
 
+   Future<void> fetchAllFxRate() async{
+    List<Map<String, dynamic>> exchangeRates = await CurrencyConversionApi.getExchangeRates();
+    setState((){
+    newExchangeRates = exchangeRates;
+    });
+  }
+
+  
   @override
   Widget build(BuildContext context) {
-    calculateTotalPrice();
     return Scaffold(
       appBar: _appBar(context),
       body:  SingleChildScrollView(
-        child: Column(
+        child: 
+        Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(
               height: 10,
             ),
-            SizedBox(
+           cartBox.isEmpty? const NoWishListWidget() : 
+           SizedBox(
               height: 500,
-              child: ListView.builder(
+              child: 
+              ListView.builder(
                 shrinkWrap: true,
                 itemCount: cartBox.length,  itemBuilder: (context, index){
                 Addtocartmodel addtocartmodel = cartBox.getAt(index);
-            return CartCard(
+               return CartCard(
                 cartImage: addtocartmodel.cartImageUrl, 
                 cartProductName: addtocartmodel.productName, 
                 cartColor: addtocartmodel.productColor, 
@@ -80,15 +105,70 @@ void calculateTotalPrice() {
                 total: total,
                 cartProductQuantity: addtocartmodel.productQuantity, press: () { setState((){
                 cartBox.deleteAt(index);
-                });}, shippingFees: addtocartmodel.cartShippingFee,
+                });}, shippingFees: addtocartmodel.cartShippingFee, currencyCode: addtocartmodel.cartCurrencyCode,
                 );
               }),
             ),
             
-            CheckOutSection(totalPrice: total,  key: checkoutSectionKey,),
+            Visibility(
+              visible: cartBox.isEmpty? false : true,
+              child: CheckOutSection(totalPrice: total,  key: checkoutSectionKey, currencyCode: currencyProductCode,)),
           ],
         ),
+      
       ),
+    );
+  }
+}
+
+
+
+class NoWishListWidget extends StatelessWidget {
+  const NoWishListWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+              children: [
+      const SizedBox(
+        height: 130,
+      ),
+      SvgPicture.asset(
+        'assets/icons/Online wishes list-bro.svg',
+        height: 250,
+      ),
+      const SizedBox(
+        height: 30,
+      ),
+      const Text(
+        'Add Item to cart',
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: AppColor.darkOrange,
+        ),
+      ),
+      const Text(
+        'You have no item in the cart',
+      ),
+           
+            const SizedBox(height: 10,),
+      SizedBox(
+                            width: 100,
+                            height: 40,
+                            child: DefaultButton(
+                              text: 'Add',
+                              press: (){
+                                Navigator.pushNamed(context, HomeScreen.routeName);
+                              }
+                            ),
+                            
+                          )
+              ],
+            ),
     );
   }
 }
@@ -104,6 +184,7 @@ class CartCard extends StatefulWidget {
   late double shippingFees;
   late double total;
   final String cartColor;
+  final String currencyCode;
   final GestureTapCallback press;
   CartCard({
     super.key,
@@ -115,7 +196,8 @@ class CartCard extends StatefulWidget {
     required this.cartColor,
     required this.press,
     required this.shippingFees,
-    required this.total,
+    required this.total, 
+    required this.currencyCode,
   });
 
   @override
@@ -178,8 +260,13 @@ class _CartCardState extends State<CartCard> {
   }
   
 
+
+//disabling the add to cart button
+bool isButtonDisable = false;
+
   @override
   Widget build(BuildContext context) {
+    double? absAmount =  basedCurrencyConvertion(widget.currencyCode.toString(), widget.cartProductPrice, newExchangeRates);
     return Padding(
       padding: const EdgeInsets.only(left: 20, right: 20, top: 5, bottom: 5),
       child: Container(
@@ -250,13 +337,24 @@ class _CartCardState extends State<CartCard> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        Row(
+                          children: [
+                        Text(currencySymbolConveeter(currencyChoosed),
+                        
+                        style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold),),
                         Text(
-                          widget.cartProductPrice.toString(),
+                          absAmount!.toStringAsFixed(2),
                           style: const TextStyle(
-                              fontSize: 18,
-                              color: AppColor.darkOrange,
+                              fontSize: 12,
+                              color: Colors.red,
                               fontWeight: FontWeight.bold),
                         ),
+                          ],
+                        )
+                        ,
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
@@ -317,9 +415,11 @@ class _CartCardState extends State<CartCard> {
 // ignore: must_be_immutable
 class CheckOutSection extends StatefulWidget {
   late double totalPrice;
-   CheckOutSection({
+  final String currencyCode;
+  CheckOutSection({
     super.key,
     required this.totalPrice,
+    required this.currencyCode,
   });
 
 
@@ -338,11 +438,12 @@ class _CheckOutSectionState extends State<CheckOutSection> {
       widget.totalPrice = newTotal;
     });
   }
+
   @override
   Widget build(BuildContext context) {
-    
-    // Update CheckOutSection total
   checkoutSectionKey.currentState?.updateTotal(widget.totalPrice);
+  double myNewTotal =  basedCurrencyConvertion(widget.currencyCode, widget.totalPrice, newExchangeRates)!;
+
     return Padding(
       padding: const EdgeInsets.only(
         top: 5,
@@ -379,15 +480,26 @@ class _CheckOutSectionState extends State<CheckOutSection> {
                       'Total Price',
                       style: TextStyle(color: AppColor.darkGrey),
                     ),
-                    Text(
-                      widget.totalPrice.toString(),
-                      style:
-                          const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    Row(
+                      children: [
+                        Text(
+                          currencySymbolConveeter(currencyChoosed),
+                          style:
+                              const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          myNewTotal.toStringAsFixed(2),
+                          style:
+                              const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                   ]),
               ElevatedButton(
-                onPressed: () => {
-                  Navigator.pushNamed(context, CheckoutScreen.routeName),
+                onPressed: () async {
+                  (await Provider.of<UserProvider>(context, listen: false).isLoggedIn)
+                   ? Navigator.pushNamed(context, CheckoutScreen.routeName) 
+                   : Navigator.pushNamed(context, LoginScreen.routeName);
                 },
                 style:  const ButtonStyle(
                   minimumSize: MaterialStatePropertyAll(Size(150, 45)),

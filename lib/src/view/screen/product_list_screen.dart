@@ -1,20 +1,23 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:bella_banga/core/size_config.dart';
 import 'package:bella_banga/src/model/vendorModel.dart';
 import 'package:bella_banga/src/services/auth_services.dart';
+import 'package:bella_banga/src/services/currency_converter_services.dart';
 import 'package:bella_banga/src/view/screen/product_by_vendor_screen.dart';
+import 'package:bella_banga/src/view/screen/product_detail_screen.dart';
+import 'package:bella_banga/src/view/screen/search_result_screen.dart';
 import 'package:bella_banga/src/view/screen/vendor_screen.dart';
+import 'package:bella_banga/src/view/widget/product_grid_view.dart';
 import 'package:flutter/material.dart';
-
 import 'package:bella_banga/core/app_color.dart';
 import 'package:bella_banga/core/app_data.dart';
 import 'package:bella_banga/src/model/categoryModel.dart';
 import 'package:bella_banga/src/model/productModel.dart';
 import 'package:bella_banga/src/services/product_services.dart';
-import 'package:bella_banga/src/utility.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:bella_banga/src/view/screen/category_screen.dart';
 import 'package:bella_banga/src/view/screen/product_by_category_screen.dart';
-import 'package:bella_banga/src/view/screen/product_detail_screen.dart';
-import 'package:bella_banga/src/view/widget/product_grid_view.dart';
+
 
 // final Product product = Product();
 
@@ -28,7 +31,9 @@ class ProductListScreen extends StatefulWidget {
 class _ProductListScreenState extends State<ProductListScreen> {
  List<CategoryModel>? categories;
  List<Product>? product;
-List<VendorModel>? vendorList;
+ List<VendorModel>? vendorList;
+List<Map<String, dynamic>> newExchangeRates = [];
+
 
 
   final ProductServices productServices = ProductServices();
@@ -41,7 +46,20 @@ List<VendorModel>? vendorList;
     fetchAllProductCategory();
     fetchAllProdut();
     fetchAllVendors();
+    fetchAllFxRate();
+   
   }
+  
+
+
+  Future<void> fetchAllFxRate() async{
+    List<Map<String, dynamic>> exchangeRates = await CurrencyConversionApi.getExchangeRates();
+    newExchangeRates = exchangeRates;
+  }
+
+   
+
+
 
     void fetchAllProductCategory() async {
     categories = await productServices.fetchAllCategory(context);
@@ -56,16 +74,84 @@ List<VendorModel>? vendorList;
     });
   }
 
+// {"message":"Unable to initiate order","success":false,"payload":null}
+
+
+  //Search Product
+
+
     void fetchAllVendors() async {
     vendorList = await authService.fetchAllVendors(context, 0, 20);
     setState(() {
     });
   }
 
+  bool shimmer = false;
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _appBar,
+  Widget build(BuildContext context) {  
+    SizeConfig().init(context);
+     return Scaffold(
+      appBar: PreferredSize(
+      preferredSize: const Size.fromHeight(100),
+      child: Container(
+        height: 100,
+        color: AppColor.lightOrange,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Image.asset(
+                      'assets/images/logo002.png',
+                      height: 50,
+                    ),
+                   
+                    const Text(
+                      "Bella Banga",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold, color: Colors.white
+                      ),
+                    )
+                  ],
+                ),
+                Row(
+                  children: [
+              //  GestureDetector(
+              //   onTap: (){
+        
+              //   },
+              //   child: const Icon(Icons.chat, color: Colors.white,),),
+              //  const SizedBox(width: 10,),
+               
+                   DropdownButton(
+                    dropdownColor: AppColor.lightOrange,
+                    iconEnabledColor: Colors.white,
+                    underline: const SizedBox(),
+                    value: currencyChoosed, 
+                    onChanged: (newValue) { 
+                        setState(() {
+                          currencyChoosed = newValue.toString();
+                        });
+                     },
+                    items: currencyList.map((valueItem){
+                        return DropdownMenuItem(value: valueItem,child: Text(valueItem, style: const TextStyle(color: Colors.white),),);
+                    }).toList(),
+                    ),
+                   
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+      
       body: SingleChildScrollView(
         child: SafeArea(
           child: Padding(
@@ -73,45 +159,31 @@ List<VendorModel>? vendorList;
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(width: 1, color: AppColor.darkGrey),
-                    borderRadius: BorderRadius.circular(10)
-                  ),
-                  margin: const EdgeInsets.only(bottom: 14, top: 0),
-                  height: 40,
-                  width: double.infinity,
-                  child: SearchAnchor(builder:
-                      (BuildContext context, SearchController controller) {
-                    return SearchBar(
-                      elevation: MaterialStateProperty.all(0),
-                      controller: controller,
-                      padding: const MaterialStatePropertyAll<EdgeInsets>(
-                          EdgeInsets.symmetric(horizontal: 16.0)),
-                      onTap: () {
-                        controller.openView();
-                      },
-                      onChanged: (_) {
-                        controller.openView();
-                      },
-                      leading: const Text("Search..."),
-                      trailing: const <Widget>[
-                        Icon(Icons.search),
+
+                GestureDetector(
+                  onTap: (){
+                            _onSearchIconPressed(context);
+                          },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    height: 30,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(50)
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Search..'),
+                        Icon(Icons.search)
                       ],
-                    );
-                  }, suggestionsBuilder:
-                      (BuildContext context, SearchController controller) {
-                    return List<ListTile>.generate(5, (int index) {
-                      final String item = 'item $index';
-                      return ListTile(
-                        title: Text(item),
-                        onTap: () {},
-                      );
-                    });
-                  }),
-                
-                  //end of search bar
+                    )
+                  ),
                 ),
+               
+               
+               const SizedBox(height: 10,),
                 _recommendedProductListView(context),
                 HeaderTitle(seeAll: "SEE ALL", title: "Shop by vendors", press: (){
                   Navigator.pushNamed(context, VendorScreen.routeName);
@@ -119,44 +191,56 @@ List<VendorModel>? vendorList;
                 Container(
   height: 100,
   color: Colors.transparent,
-  child: ListView.builder(
+  child:  ListView.builder(
     scrollDirection: Axis.horizontal,
     itemCount: (vendorList == null) ? 0 : vendorList!.length,
     itemBuilder: (BuildContext ctx, index) {
-      return GestureDetector(
-        child: Container(
-          height: 300,
-          width: 300,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(width: 1, color: AppColor.lightOrange),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Image.asset("assets/images/ShopsVendor.png"),
-                SizedBox(
-                  width: 200,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(vendorList![index].businessName.toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-                      Text(vendorList![index].businessAddress.toString(), overflow: TextOverflow.ellipsis),
-                    ],
-                  ),
-                )
-              ],
+      return 
+      GestureDetector(
+          child: Container(
+              height: 300,
+              width: 300,
+              decoration: BoxDecoration(
+                color: AppColor.lightOrange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(width: 1, color: AppColor.lightOrange),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 70,
+                      width: 70,
+                      clipBehavior: Clip.hardEdge,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(50),
+                        color: Colors.black87,
+                      ),
+                      child: Image.network(imageUrl+vendorList![index].dpLink.toString())),
+                      const SizedBox(width:8,),
+                    SizedBox(
+                      width: 200,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(vendorList![index].businessName.toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                          Text(vendorList![index].businessAddress.toString(), overflow: TextOverflow.ellipsis),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
-        onTap: (){
-          Navigator.pushNamed(context, ProductByVendorScreen.routeName, arguments: vendorList![index].id);
-        },
-      );
+          onTap: (){
+            Navigator.pushNamed(context, ProductByVendorScreen.routeName, arguments: vendorList![index].id);
+          },
+        );
+      
+      
     },
   ),
 ),
@@ -169,7 +253,7 @@ List<VendorModel>? vendorList;
                   color: Colors.transparent,
                  child: GridView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: (categories == null)? 0 : 4,
+                  itemCount: (categories == null)? 0 : categories!.length,
                   itemBuilder: (BuildContext ctx, index){
                   return TopCategoryCard( categoryName: categories![index].category!.name.toString(), categoryImage: "$imageUrl${categories![index].category?.imageLink}", press: () { 
                     Navigator.pushNamed(context, ProductByCategoryScreen.routeName, arguments:categories?[index].category!.id);
@@ -187,7 +271,8 @@ List<VendorModel>? vendorList;
 
                  Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: GridView.builder(
+                  child: 
+                  GridView.builder(
                   itemCount: (product == null)? 0 : product!.length,
                     shrinkWrap: true,
                     physics: const ScrollPhysics(),
@@ -200,77 +285,75 @@ List<VendorModel>? vendorList;
                     itemBuilder: (_, index) {
                       return ProductGridView(productImgUrl: "$imageUrl${product![index].thumbnail}", productTitle: product![index].name.toString(), productPrice:  product![index].price as double, press: () { 
                         Navigator.pushNamed(context, ProductDetailScreen.routeName, arguments: product![index]);
-                       }, currencyType: product![index].currencyCode.toString(),);
+                       }, currencyType: product![index].currencyCode.toString(), productId: product![index].id as int,);
                       
                     },
-                  ),
+                  
+                  ), 
                 ),
-               
               ],
             ),
           ),
         ),
+      
+      
       ),
     );
   }
 }
 
-
-
-//seperate function
-
-
-
-//App Bar
-  PreferredSize get _appBar {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(60),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Image.asset(
-                    'assets/images/logo.jpg',
-                    height: 50,
-                  ),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  const Text(
-                    "Bella Banga",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                ],
-              ),
-              Row(
-                children: [
-             GestureDetector(
-              onTap: (){
-
-              },
-              child: const Icon(Icons.chat, color: AppColor.darkOrange,),),
-             const SizedBox(width: 10,),
-                  GestureDetector(
-                    onTap: (){
-                    
-                    },
-                    child: const Icon(Icons.favorite, color: AppColor.darkOrange,)),
-
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+  void _onSearchIconPressed(BuildContext context) async {
+    showSearch(
+      context: context,
+      delegate: SearchBarDelegate(),
     );
   }
+
+
+class SearchBarDelegate extends SearchDelegate<String> {
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: () {
+              query = '';
+            },
+          ),
+        ],
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, '');
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    // Implement your search results here
+    return Center(
+      child: SearchResultScreen(query: query,)
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    // Implement your search suggestions here
+    return const Center(
+      child: Text('Search Product')
+    );
+  }
+}
+
 
 //slider
   Widget _recommendedProductListView(BuildContext context) {
@@ -431,10 +514,6 @@ class TopCategoryCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
             borderRadius: BorderRadius.circular(50),
-            // border: Border.all(color: AppColor.lightGrey, width: 1.0),
-            // image: DecorationImage(
-            //   image: NetworkImage(categoryImage), scale: 1.0, fit: BoxFit.contain,
-            //   ),
             
             ),
             child: Image.network(categoryImage,  fit: BoxFit.fitWidth, errorBuilder:
@@ -448,5 +527,4 @@ class TopCategoryCard extends StatelessWidget {
     );
   }
 }
-
 

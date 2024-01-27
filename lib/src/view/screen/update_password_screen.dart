@@ -9,7 +9,7 @@ import 'package:bella_banga/core/constant.dart';
 import 'package:bella_banga/core/custom_surfix_icon.dart';
 import 'package:bella_banga/core/default_button.dart';
 import 'package:bella_banga/core/form_error.dart';
-import 'package:bella_banga/src/size_config.dart';
+import 'package:bella_banga/core/size_config.dart';
 
 class UpdatePasswordScreen extends StatefulWidget {
   final String email;

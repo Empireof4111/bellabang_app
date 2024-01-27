@@ -1,13 +1,20 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+// ignore_for_file: public_member_api_docs, sort_constructors_first, unnecessary_null_comparison, use_build_context_synchronously
+import 'package:bella_banga/src/provider/user_provider.dart';
+import 'package:bella_banga/src/services/currency_converter_services.dart';
+import 'package:bella_banga/src/services/wishlist_services.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
+import 'package:bella_banga/src/view/screen/login_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bella_banga/core/app_color.dart';
+import 'package:provider/provider.dart';
 
-class ProductGridView extends StatelessWidget {
+class ProductGridView extends StatefulWidget {
   final String productImgUrl;
   final String productTitle;
   final String currencyType;
   final double productPrice;
+  final int productId;
   final GestureTapCallback press;
   const ProductGridView({
     super.key,
@@ -15,10 +22,128 @@ class ProductGridView extends StatelessWidget {
     required this.productTitle,
     required this.currencyType,
     required this.productPrice,
+    required this.productId,
     required this.press,
   });
 
-  Widget _gridItemHeader() {
+  @override
+  State<ProductGridView> createState() => _ProductGridViewState();
+}
+
+
+
+  
+class _ProductGridViewState extends State<ProductGridView> {
+
+ @override
+  void initState(){
+    super.initState();
+    fetchAllFxRate();
+    basedCurrencyConvertion(widget.currencyType, widget.productPrice, newExchangeRates);
+  }
+
+
+   Future<void> fetchAllFxRate() async{
+    List<Map<String, dynamic>> exchangeRates = await CurrencyConversionApi.getExchangeRates();
+    newExchangeRates = exchangeRates;
+    setState(() {
+      
+    });
+  }
+
+
+  List<Map<String, dynamic>> newExchangeRates = [];
+
+  Widget _gridItemFooter(BuildContext context, double productPrice, String productTitle,) {
+    double? absAmount =  basedCurrencyConvertion(widget.currencyType, productPrice, newExchangeRates);
+    return Padding(
+      padding: const EdgeInsets.all(0),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        height: 70,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(5),
+            bottomRight: Radius.circular(5),
+          ),   
+               ),
+        child:  Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FittedBox(
+              clipBehavior: Clip.hardEdge,
+              child: Text(
+                productTitle,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            const SizedBox(height: 5),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                    // ignore: unnecessary_brace_in_string_interps
+                    currencySymbolConveeter(currencyChoosed),
+                    // "${currencyChoosed} ",
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    )),
+              Text(
+                 "${absAmount!.toStringAsFixed(2)} ",
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    )),
+                const SizedBox(width: 3),
+                Visibility(
+                  visible: true,
+                  child: SizedBox(
+                    width: 40,
+                    child: Text(
+                    "${currencySymbolConveeter(currencyChoosed)}${(absAmount + 5 * (absAmount/100)).toStringAsFixed(2)}",
+                      
+                      // (absAmount + 5 * (absAmount/100)).toStringAsFixed(2),
+                      style: const TextStyle(
+                        decoration: TextDecoration.lineThrough,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                )
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+WishlistSerives wishlistSerives = WishlistSerives();
+void addWishList(int productId) async {
+await wishlistSerives.addWishList(productId);
+setState(() {
+});
+}
+
+bool isFavorite = false;
+ 
+  @override
+  Widget build(BuildContext context) {
+  Widget gridItemHeader() {
     return Padding(
       padding: const EdgeInsets.all(0),
       child: Row(
@@ -44,18 +169,35 @@ class ProductGridView extends StatelessWidget {
             ),
          
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.favorite,
-              color: AppColor.lightOrange,
+              color: isFavorite ? Colors.red : Colors.grey, 
             ),
-            onPressed: () => {
-              // color: 
+            onPressed: () async{
+              setState(() {
+                isFavorite = !isFavorite;
+              });
+              await Provider.of<UserProvider>(context, listen: false).isLoggedIn
+              ? addWishList(widget.productId) 
+              : Navigator.pushNamed(context, LoginScreen.routeName);  
             }
           ),
         ],
       ),
     );
   }
+
+    return GestureDetector(
+      onTap: widget.press,
+      child: GridTile(
+               header: gridItemHeader(),
+               footer: _gridItemFooter(context, widget.productPrice, widget.productTitle),
+               child: _gridItemBody(widget.productImgUrl),
+             ),
+    );
+  }
+}
+
 
   Widget _gridItemBody( String productImgUrl) {
     return Container(
@@ -85,86 +227,3 @@ class ProductGridView extends StatelessWidget {
     );
   }
 
-  Widget _gridItemFooter(BuildContext context, double productPrice, String productTitle) {
-    double percentage = 0.2;
-    double discountPrice = percentage * productPrice; 
-    double actualPrice = productPrice + discountPrice;
-    return Padding(
-      padding: const EdgeInsets.all(0),
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        height: 70,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(5),
-            bottomRight: Radius.circular(5),
-          ),   
-               ),
-        child:  Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            FittedBox(
-              clipBehavior: Clip.hardEdge,
-              child: Text(
-                productTitle,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-            const SizedBox(height: 5),
-            Row(
-              children: [
-                Text(
-                    currencyType.toString(),
-                    style: const TextStyle(
-                      color: Colors.red,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    )),
-              Text(
-                    productPrice.toString(),
-                    style: const TextStyle(
-                      color: Colors.red,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    )),
-                const SizedBox(width: 3),
-                Visibility(
-                  visible: true,
-                  child: Text(
-                    actualPrice.toString(),
-                    style: const TextStyle(
-                      decoration: TextDecoration.lineThrough,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                )
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: press,
-      child: GridTile(
-               header: _gridItemHeader(),
-               footer: _gridItemFooter(context, productPrice, productTitle),
-               child: _gridItemBody(productImgUrl),
-             ),
-    );
-  }
-}

@@ -1,5 +1,6 @@
 import 'package:bella_banga/core/app_color.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class OnBoardingScreen extends StatefulWidget {
@@ -11,7 +12,6 @@ class OnBoardingScreen extends StatefulWidget {
 }
 
 class _OnBoardingScreenState extends State<OnBoardingScreen> {
-  //testing product
   final PageController _controller = PageController();
   bool onLastPage = false;
   @override
@@ -137,8 +137,11 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                   ),
                   onLastPage
                       ? GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamedAndRemoveUntil(context, "/login", (route) => false );
+                          onTap: () async {
+                           final SharedPreferences pref = await SharedPreferences.getInstance();
+                           pref.setBool('ON_BOARDING', false);
+                            // ignore: use_build_context_synchronously
+                            Navigator.pushNamedAndRemoveUntil(context, "/home", (route) => false );
                           },
                           child: const Text(
                             "Done",

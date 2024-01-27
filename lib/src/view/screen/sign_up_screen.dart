@@ -1,12 +1,15 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers, non_constant_identifier_names, avoid_returning_null_for, avoid_returning_null_for_void
+import 'package:bella_banga/core/app_color.dart';
 import 'package:bella_banga/core/constant.dart';
 import 'package:bella_banga/core/custom_surfix_icon.dart';
 import 'package:bella_banga/core/default_button.dart';
 import 'package:bella_banga/core/form_error.dart';
+import 'package:bella_banga/core/keyboard.dart';
 import 'package:bella_banga/core/social_card.dart';
 import 'package:bella_banga/src/services/auth_services.dart';
-import 'package:bella_banga/src/size_config.dart';
+import 'package:bella_banga/core/size_config.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class SignUpScreen extends StatefulWidget {
   const  SignUpScreen({super.key});
@@ -78,6 +81,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     var value1 = '-1';
@@ -110,6 +115,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: SizeConfig.screenHeight * 0.04),
+
+
                  //FORM BEGIN
 Form(
       key: _formKey,
@@ -254,7 +261,7 @@ Form(
       ),
     ),
           SizedBox(height: getProportionateScreenHeight(20)),
-        TextFormField(
+      TextFormField(
           controller: _passwordController,
       obscureText: true,
       onSaved: (newValue) => password = newValue!,
@@ -316,20 +323,32 @@ Form(
           
           FormError(errors: errors),
           SizedBox(height: getProportionateScreenHeight(40)),
-          DefaultButton(
+          isLoading  ? const SpinKitFadingCircle(
+              color: AppColor.darkOrange,
+              size: 50,
+            ) : DefaultButton(
             text: "Continue",
-            press: () {
+            press: () async {
               if (_formKey.currentState!.validate()) {
-                _formKey.currentState!.save();
-                SignUp();
-                // if all are valid then go to success screen
-              }
+                  _formKey.currentState!.save();
+                   setState(() {
+                    isLoading = true;
+                  });
+                  SignUp();
+                  await Future.delayed(const Duration(seconds: 5));
+                  setState(() {
+                    isLoading = false;
+                  });
+                  // ignore: use_build_context_synchronously
+                  KeyboardUtil.hideKeyboard(context);
+                }
             },
           ),
         ],
       ),
     ),
                  //FORM ENDS
+               
                   SizedBox(height: SizeConfig.screenHeight * 0.04),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

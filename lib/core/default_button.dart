@@ -1,5 +1,5 @@
 import 'package:bella_banga/core/app_color.dart';
-import 'package:bella_banga/src/size_config.dart';
+import 'package:bella_banga/core/size_config.dart';
 import 'package:flutter/material.dart';
 
 class DefaultButton extends StatelessWidget {
@@ -13,6 +13,7 @@ class DefaultButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return SizedBox(
       width: double.infinity,
       height: getProportionateScreenHeight(56),

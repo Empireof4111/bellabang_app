@@ -1,4 +1,4 @@
-import 'package:bella_banga/src/utility.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:bella_banga/core/app_color.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';

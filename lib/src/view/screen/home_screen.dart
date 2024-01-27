@@ -1,4 +1,7 @@
+import 'package:bella_banga/src/model/userModel.dart';
+import 'package:bella_banga/src/provider/user_provider.dart';
 import 'package:bella_banga/src/view/screen/category_screen.dart';
+import 'package:bella_banga/src/view/screen/login_screen.dart';
 import 'package:bella_banga/src/view/widget/page_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
@@ -6,7 +9,7 @@ import 'package:bella_banga/core/app_data.dart';
 import 'package:bella_banga/src/view/screen/cart_screen.dart';
 import 'package:bella_banga/src/view/screen/profile_screen.dart';
 import 'package:bella_banga/src/view/screen/product_list_screen.dart';
-
+import 'package:provider/provider.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
   static const String routeName = "/home";
@@ -14,9 +17,8 @@ class HomeScreen extends StatefulWidget {
   static const List<Widget> screens = [
     ProductListScreen(),
     CategoryScreen(),
-    // FavoriteScreen(),
     CartScreen(),
-    ProfileScreen()
+    ProfileScreen(),
   ];
 
   @override
@@ -25,8 +27,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int newIndex = 0;
+
   @override
   Widget build(BuildContext context) {
+    User? user = Provider.of<UserProvider>(context).user;
+    print(user.name);
     return PageWrapper(
       child: Scaffold(
         bottomNavigationBar: BottomNavyBar(
@@ -42,9 +47,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               )
               .toList(),
-          onItemSelected: (currentIndex) {
-            newIndex = currentIndex;
-            setState(() {});
+          onItemSelected: (currentIndex) async {
+            // ignore: unnecessary_null_comparison
+            UserProvider userProvider = UserProvider();
+            if (currentIndex == 3 && (user.id == null || user.name!.isEmpty || !(await userProvider.isLoggedIn))) {
+              // ignore: use_build_context_synchronously
+              Navigator.pushNamed(context, LoginScreen.routeName);
+            } else {
+              newIndex = currentIndex;
+              setState(() {});
+            }
           },
         ),
         body: HomeScreen.screens[newIndex],

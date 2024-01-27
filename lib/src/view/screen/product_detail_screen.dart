@@ -3,15 +3,13 @@ import 'package:bella_banga/core/app_color.dart';
 import 'package:bella_banga/core/default_button.dart';
 import 'package:bella_banga/src/model/local_storage_model/addtocartmodel.dart';
 import 'package:bella_banga/src/model/productModel.dart';
-import 'package:bella_banga/src/size_config.dart';
-import 'package:bella_banga/src/utility.dart';
+import 'package:bella_banga/src/services/currency_converter_services.dart';
+import 'package:bella_banga/core/size_config.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:bella_banga/src/view/widget/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:bella_banga/src/view/widget/page_wrapper.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-
-// final ProductController controller = Get.put(ProductController());
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -23,6 +21,22 @@ class ProductDetailScreen extends StatefulWidget {
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
+
+  @override
+  void initState(){
+    super.initState();
+    fetchAllFxRate();
+  }
+
+   Future<void> fetchAllFxRate() async{
+    List<Map<String, dynamic>> exchangeRates = await CurrencyConversionApi.getExchangeRates();
+    setState((){
+    newExchangeRates = exchangeRates;
+    });
+  }
+
+  List<Map<String, dynamic>> newExchangeRates = [];
+  
 //this custom AppBar
   PreferredSizeWidget _appBar(BuildContext context) {
     return AppBar(
@@ -121,6 +135,8 @@ int productQuantity = 1;
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
+    double? absAmount =  basedCurrencyConvertion(widget.product.currencyCode.toString(), widget.product.price as double, newExchangeRates);
+    double? myShippingfee =  basedCurrencyConvertion(widget.product.currencyCode.toString(), widget.product.shippingFees as double, newExchangeRates);
     SizeConfig().init(context);
     return SafeArea(
       child: Scaffold(
@@ -147,10 +163,10 @@ int productQuantity = 1;
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          Text( 
-                            "${widget.product.currencyCode} ${widget.product.price}",
+                         newExchangeRates.isNotEmpty ? Text( 
+                            "${currencySymbolConveeter(currencyChoosed)} ${absAmount?.toStringAsFixed(2)}",
                             style: Theme.of(context).textTheme.displayLarge,
-                          ),
+                          ) : const Text("Loading.."),
                           const SizedBox(width: 3),
                           Visibility(
                             visible: false,
@@ -164,10 +180,10 @@ int productQuantity = 1;
                             ),
                           ),
                           const Spacer(),
-                          Text(
-                           widget.product.shippingFees.toString(),
+                         newExchangeRates.isNotEmpty ? Text(
+                           "${currencySymbolConveeter(currencyChoosed)}${myShippingfee?.toStringAsFixed(2)}",
                             style: const TextStyle(fontWeight: FontWeight.w500, color: AppColor.lightOrange),
-                          )
+                          ) : const Text("Loading.."),
                         ],
                       ),
                       const SizedBox(height: 30),
@@ -222,7 +238,9 @@ int productQuantity = 1;
                                 productPrice: widget.product.price as double,
                                 cartImageUrl: widget.product.images!.split(',')[0].toString(), 
                                 cartShippingFee: widget.product.shippingFees as double, 
-                                cartServiceCharged: widget.product.serviceCharge as double,
+                                cartServiceCharged: widget.product.serviceCharge as double, 
+                                cartCurrencyCode: widget.product.currencyCode.toString(), 
+                                id: widget.product.id as int,
                                 ));
 
                                 showSnackBar(context, "${widget.product.name} Added to cart");

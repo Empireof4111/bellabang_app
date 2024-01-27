@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:bella_banga/src/utility.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 

@@ -1,15 +1,16 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, avoid_print
 
 import 'dart:convert';
 
-import 'package:bella_banga/error_handling.dart';
+import 'package:bella_banga/core/error_handling.dart';
 import 'package:bella_banga/src/model/userModel.dart';
 import 'package:bella_banga/src/model/vendorModel.dart';
 import 'package:bella_banga/src/provider/user_provider.dart';
-import 'package:bella_banga/src/utility.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:bella_banga/src/view/screen/home_screen.dart';
 import 'package:bella_banga/src/view/screen/login_screen.dart';
 import 'package:bella_banga/src/view/screen/otp_screen.dart';
+import 'package:bella_banga/src/view/screen/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -68,7 +69,7 @@ class AuthService {
         lastModifiedDate: null,
         );
       http.Response res = await http.post(
-        Uri.parse('https://service.phopis.com/bellabanga/api/user/signup'),
+        Uri.parse('$basedUrl/api/user/signup'),
         body: user.toJson(),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -99,7 +100,7 @@ class AuthService {
   }) async {
     try {
       http.Response res = await http.post(
-        Uri.parse('https://service.phopis.com/bellabanga/api/user/signin'),
+        Uri.parse('$basedUrl/api/user/signin'),
         body: jsonEncode({
           "username": email,
           "password": password,
@@ -112,19 +113,33 @@ class AuthService {
         response: res,
         context: context,
         onSuccess: () async {
-          showSnackBar(context, 'Login Successifull');
-          Provider.of<UserProvider>(context, listen: false).setUser((res.body)); ///Acccessing the main key User
+          showSnackBar(context, jsonDecode(res.body)['message']);
           SharedPreferences prefs = await SharedPreferences.getInstance();
+          Provider.of<UserProvider>(context, listen: false).setUser((res.body));
+        await Provider.of<UserProvider>(context, listen: false).saveUserToSharedPreferences(); ///Acccessing the main key User
           prefs.setString('Bearer', jsonDecode(res.body)['bearer']);
           Navigator.restorablePushNamedAndRemoveUntil(
               context, HomeScreen.routeName, (route) => false);
         },
       );
     } catch (e) {
-      showSnackBar(context, 'Invalid Credential');
+      showSnackBar(context, e.toString());
     }
   }
-  
+
+void signOutUser(BuildContext context) async {
+      try {
+        // Retrieve the existing instance of UserProvider
+        UserProvider userProvider = UserProvider();
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.remove('Bearer');
+        userProvider.logout();
+        Navigator.restorablePushNamedAndRemoveUntil(
+            context, HomeScreen.routeName, (route) => false);
+      } catch (e) {
+        showSnackBar(context, e.toString());
+      }
+}
 //Verify Account
 void verifyUser({
     required BuildContext context,
@@ -133,7 +148,7 @@ void verifyUser({
   }) async {
     try {
       http.Response res = await http.post(
-        Uri.parse('https://service.phopis.com/bellabanga/api/user/verify'),
+        Uri.parse('$basedUrl/api/user/verify'),
         body: jsonEncode({
           "username": email,
           "otp": otp,
@@ -142,7 +157,6 @@ void verifyUser({
          'Content-Type': 'application/json; charset=UTF-8',
         },
       );
-      print(res.body);
       httpErrorHandle(
         response: res,
         context: context,
@@ -164,18 +178,20 @@ void verifyUser({
     required String email,
     required String password,
   }) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('Bearer');
     try {
       http.Response res = await http.post(
-        Uri.parse('https://service.phopis.com/bellabanga/api/user/password-reset'),
+        Uri.parse('$basedUrl/api/user/password-reset'),
         body: jsonEncode({
           "username": email,
           "password": password,
         }),
         headers: <String, String>{
          'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $token',
         },
       );
-      print(res.body);
       httpErrorHandle(
         response: res,
         context: context,
@@ -190,6 +206,87 @@ void verifyUser({
     }
   }
 
+   void changePassword({
+    required BuildContext context,
+    required String oldpassword,
+    required String password,
+  }) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('Bearer');
+    try {
+      http.Response res = await http.post(
+        Uri.parse('$basedUrl/api/user/change-password'),
+        body: jsonEncode({
+          "oldPassword": oldpassword,
+          "newPassword": password,
+        }),
+        headers: <String, String>{
+         'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $token',
+        },
+      );
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () async {
+         showSnackBar(context, "Password Change Successiful");
+          Navigator.pushNamed(
+              context, ProfileScreen.routeName);
+        },
+      );
+    } catch (e) {
+      showSnackBar(context, e.toString());
+    }
+  }
+
+
+
+  void editProfile({
+    required BuildContext context,
+    required String id,
+    required String name,
+    required String phone,
+    required String email,
+    required String dpLink,
+    required String country,
+    required String city,
+    required String address,
+  }) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('Bearer');
+    try {
+      http.Response res = await http.put(
+        Uri.parse('$basedUrl/api/user/profile-update/$id'),
+        body: jsonEncode({
+          "name": name,
+          "phone": phone,
+          "email": email,
+          "dpLink": dpLink,
+          "country": country,
+          "city": city,
+          "address": address,
+        }),
+        headers: <String, String>{
+         'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $token',
+        },
+      );
+
+      print(res.body);
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () async {
+         showSnackBar(context, "Profile Update Successiful");
+          Navigator.pushNamed(
+              context, ProfileScreen.routeName);
+        },
+      );
+    } catch (e) {
+      showSnackBar(context, e.toString());
+    }
+  }
+
 //Forgot password 
   void regenarateOtp({
     required BuildContext context,
@@ -197,7 +294,7 @@ void verifyUser({
   }) async {
     try {
       http.Response res = await http.post(
-        Uri.parse('https://service.phopis.com/bellabanga/api/user/generate-otp'),
+        Uri.parse('$basedUrl/api/user/generate-otp'),
         body: jsonEncode({
           "username": email,
         }),
@@ -225,7 +322,7 @@ void verifyUser({
    List<VendorModel> vendorList = [];
     try {
       http.Response res =
-          await http.get(Uri.parse('https://service.phopis.com/bellabanga/api/user/get_by_role?role=VENDOR&status=AC&page=$page&size=$size'), 
+          await http.get(Uri.parse('$basedUrl/api/user/get_by_role?role=VENDOR&status=AC&page=$page&size=$size'), 
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       });

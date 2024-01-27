@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:bella_banga/src/model/vendorModel.dart';
 import 'package:bella_banga/src/services/auth_services.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:bella_banga/src/view/screen/product_by_vendor_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -39,6 +40,11 @@ List<VendorModel>? vendorList;
 
   @override
   Widget build(BuildContext context) {
+      if(vendorList == null){
+            return const Center(child: MyProgressor());
+    }else if(vendorList!.isEmpty){
+            return const Center(child: Text('Product Not Found'));
+    }else{
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColor.lightOrange,
@@ -67,7 +73,7 @@ List<VendorModel>? vendorList;
         
 
 
-    );
+    );}
   }
 }
 

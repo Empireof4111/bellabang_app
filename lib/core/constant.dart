@@ -1,6 +1,6 @@
 // Form Error
 import 'package:bella_banga/core/app_color.dart';
-import 'package:bella_banga/src/size_config.dart';
+import 'package:bella_banga/core/size_config.dart';
 import 'package:flutter/material.dart';
 
 final RegExp emailValidatorRegExp =

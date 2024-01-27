@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 class MyAdressScreen extends StatefulWidget {
   const MyAdressScreen({super.key});
-  static String routeName = "/my-address";
+  static const String routeName = "/my-address";
   @override
   State<MyAdressScreen> createState() => _MyAdressScreenState();
 }

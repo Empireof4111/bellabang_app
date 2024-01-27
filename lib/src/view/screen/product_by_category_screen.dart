@@ -1,7 +1,7 @@
 import 'package:bella_banga/core/app_color.dart';
 import 'package:bella_banga/src/model/productModel.dart';
 import 'package:bella_banga/src/services/product_services.dart';
-import 'package:bella_banga/src/utility.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:bella_banga/src/view/screen/product_detail_screen.dart';
 import 'package:bella_banga/src/view/widget/product_grid_view.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +49,8 @@ final ProductServices productServices = ProductServices();
         backgroundColor: AppColor.lightOrange,
         title:  Text(product?[0].categoryName.toString() ?? 'Shop by....', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))
       ),
-      body:Padding(
+      body:  product == null ? const Center(child: MyProgressor(),) :
+      Padding(
                   padding: const EdgeInsets.all(20),
                   child: GridView.builder(
                   itemCount: (product == null)? 0 : product!.length,
@@ -62,11 +63,16 @@ final ProductServices productServices = ProductServices();
                       crossAxisSpacing: 10,
                     ),
                     itemBuilder: (_, index) {
+                      if (product == null) {
+            return const Center(child: MyProgressor());
+          } else if (product!.isEmpty) {
+            return const Center(child: Text('No product found'));
+          } else {
                       return ProductGridView(productImgUrl: "$imageUrl${product![index].thumbnail}", productTitle: product![index].name.toString(), productPrice: product![index].price as double, press: () { 
                          Navigator.pushNamed(context, ProductDetailScreen.routeName, arguments: product![index]);
-                       }, currencyType: product![index].currencyCode.toString(),);
+                       }, currencyType: product![index].currencyCode.toString(), productId: product![index].id as int,);
                       
-                    },
+                    }}
                   ),
                 )
                

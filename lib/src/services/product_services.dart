@@ -1,22 +1,23 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, avoid_print
 
 import 'dart:convert';
 
-import 'package:bella_banga/error_handling.dart';
+import 'package:bella_banga/core/error_handling.dart';
 import 'package:bella_banga/src/model/categoryModel.dart';
 import 'package:bella_banga/src/model/productModel.dart';
-import 'package:bella_banga/src/utility.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class ProductServices{
 
 //FETCHING ALL PRODUCT
+
 Future<List<Product>> fetchAllUserProducts(BuildContext context, int page, int size) async {
     List<Product> userProductList = [];
     try {
       http.Response res =
-          await http.get(Uri.parse('https://service.phopis.com/bellabanga/api/product/get_all?page=$page&size=$size'), 
+          await http.get(Uri.parse('$basedUrl/api/product/get_all?page=$page&size=$size'), 
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       });
@@ -36,9 +37,38 @@ Future<List<Product>> fetchAllUserProducts(BuildContext context, int page, int s
             }
           });
     } catch (e) {
-      showSnackBar(context, e.toString());
+      print(e);
     }
     return userProductList;
+  }
+
+  Future<List<Product>> searchProducts(BuildContext context, int page, int size, String searchQuery) async {
+    List<Product> searchProductList = [];
+    try {
+      http.Response res =
+          await http.get(Uri.parse('$basedUrl/api/product/search?q=$searchQuery&status=AC&page=$page&size=$size'), 
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      });
+
+      httpErrorHandle(
+          response: res,
+          context: context,
+          onSuccess: () {
+            for (int i = 0; i < jsonDecode(res.body)['payload']['content'].length; i++) {
+              searchProductList.add(
+                Product.fromJson(
+                  jsonEncode(
+                    jsonDecode(res.body)['payload']['content'][i],
+                  ),
+                ),
+              );
+            }
+          });
+    } catch (e) {
+      print(e);
+    }
+    return searchProductList;
   }
 
 //FETCHING ALL BY CATEGORY ID
@@ -46,11 +76,10 @@ Future<List<Product>> fetchAllProductsByCategory(BuildContext context, int categ
     List<Product> userProductList = [];
     try {
       http.Response res =
-          await http.get(Uri.parse('https://service.phopis.com/bellabanga/api/product/get_by_category_id/$categoryId?page=$page&size=$size'), 
+          await http.get(Uri.parse('$basedUrl/api/product/get_by_category_id/$categoryId?page=$page&size=$size'), 
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       });
-        // print(res.body);
       httpErrorHandle(
           response: res,
           context: context,
@@ -66,7 +95,6 @@ Future<List<Product>> fetchAllProductsByCategory(BuildContext context, int categ
             }
           });
     } catch (e) {
-      // showSnackBar(context, e.toString());
       print(e);
     }
     return userProductList;
@@ -77,11 +105,10 @@ Future<List<Product>> fetchAllProductsByCategory(BuildContext context, int categ
     List<Product> vendorProductList = [];
     try {
       http.Response res =
-          await http.get(Uri.parse('https://service.phopis.com/bellabanga/api/product/get_all_by_vendor/$vendorId?page=$page&size=$size'), 
+          await http.get(Uri.parse('$basedUrl/api/product/get_all_by_vendor/$vendorId?page=$page&size=$size'), 
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       });
-        print(res.body);
       httpErrorHandle(
           response: res,
           context: context,
@@ -97,20 +124,22 @@ Future<List<Product>> fetchAllProductsByCategory(BuildContext context, int categ
             }
           });
     } catch (e) {
-      // showSnackBar(context, e.toString());
       print(e);
     }
     return vendorProductList;
   }
 
 //FETCHING ALL CATEGORY
+
 Future<List<CategoryModel>> fetchAllCategory(BuildContext context) async {
     List<CategoryModel> productCategoryList = [];
     try {
       http.Response res =
-          await http.get(Uri.parse('https://service.phopis.com/bellabanga/api/category/get_all'), 
+          await http.get(Uri.parse('$basedUrl/api/category/get_all_active'), 
       headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+
       });
       httpErrorHandle(
           response: res,
@@ -127,7 +156,7 @@ Future<List<CategoryModel>> fetchAllCategory(BuildContext context) async {
             }
           });
     } catch (e) {
-      showSnackBar(context, e.toString());
+      print(e);
     }
     return productCategoryList;
   }
@@ -139,11 +168,10 @@ Future<List<CategoryModel>> fetchProductCategoryById(BuildContext context, int i
     List<CategoryModel> productCategoryById = [];
     try {
       http.Response res =
-          await http.get(Uri.parse('https://service.phopis.com/bellabanga/api/category/get_by_id/$id'), 
+          await http.get(Uri.parse('$basedUrl/api/category/get_by_id/$id'), 
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       });
-      print(jsonDecode(res.body)['payload']['category']);
       httpErrorHandle(
           response: res,
           context: context,
@@ -157,7 +185,6 @@ Future<List<CategoryModel>> fetchProductCategoryById(BuildContext context, int i
               );
           });
     } catch (e) {
-      // showSnackBar(context, e.toString());
       print(e);
     }
     return productCategoryById;

@@ -3,9 +3,12 @@
 import 'package:bella_banga/core/app_color.dart';
 import 'package:bella_banga/core/constant.dart';
 import 'package:bella_banga/core/default_button.dart';
+import 'package:bella_banga/core/keyboard.dart';
 import 'package:bella_banga/src/services/auth_services.dart';
-import 'package:bella_banga/src/size_config.dart';
+import 'package:bella_banga/core/size_config.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class OtpScreen extends StatefulWidget {
   final  email;
@@ -70,6 +73,8 @@ void VerifyUser(){
 void RegenerateOtp(){
   authService.regenarateOtp(context: context, email: widget.email);
 }
+
+  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
      SizeConfig().init(context);
@@ -196,10 +201,25 @@ void RegenerateOtp(){
             ],
           ),
           SizedBox(height: SizeConfig.screenHeight * 0.15),
-          DefaultButton(
+          isLoading  ? const SpinKitFadingCircle(
+              color: AppColor.darkOrange,
+              size: 50,
+            ) :DefaultButton(
             text: "Continue",
-            press: () {
-              VerifyUser();
+            press: () async {
+              if (_formKey.currentState!.validate()) {
+                  _formKey.currentState!.save();
+                   setState(() {
+                    isLoading = true;
+                  });
+                  VerifyUser();
+                  await Future.delayed(const Duration(seconds: 3));
+                  setState(() {
+                    isLoading = false;
+                  });
+                  // ignore: use_build_context_synchronously
+                  KeyboardUtil.hideKeyboard(context);
+                }
             },
           )
         ],
@@ -208,8 +228,8 @@ void RegenerateOtp(){
               SizedBox(height: SizeConfig.screenHeight * 0.1),
               GestureDetector(
                 onTap: () {
-                  // OTP code resend
                 RegenerateOtp();
+                showSnackBar(context, "OTP Sent");
                 },
                 child: const Text(
                   "Resend OTP Code",
