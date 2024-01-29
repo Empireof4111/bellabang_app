@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:bella_banga/core/app_color.dart';
@@ -65,8 +64,8 @@ void updateProfile()async{
   phone: _phoneNumberController.text, 
   email: _emailController.text, 
   dpLink: _pickedImage.toString(), 
-  country: 'America', 
-  city: "Cicago", 
+  country: selectedCountry.toString(), 
+  city: selectedCity.toString(), 
   address: _addressController.text);
 }
 
@@ -106,10 +105,14 @@ void updateProfile()async{
     }
   }
 
+
+       String? selectedCountry;
+      String? selectedCity;
+
   @override
   Widget build(BuildContext context) {
-    var value1 = '-1';
-    var value2 = '-1';
+    print(selectedCountry);
+    print(selectedCity);
     return  Scaffold(
       appBar: AppBar(
         foregroundColor: Colors.white,
@@ -248,41 +251,45 @@ void updateProfile()async{
           ),
               ),
               SizedBox(height: getProportionateScreenHeight(20)),
-              DropdownButtonFormField(
-                decoration: const InputDecoration(
-                   labelText: "Country",
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            suffixIcon: CustomSurffixIcon(svgIcon: "assets/icons/Location point.svg"),
-                ),
-                value: value1,
-                hint: const Text("-Select Country-"),
-                items: const [
-                  DropdownMenuItem(value: "-1", child: Text('Nigeria')),
-                  DropdownMenuItem(value: "2", child: Text('United Kindom')),
-                ], onChanged: (String? value) { 
-                  setState(() {
-                    value = value1;
-                  });
-                 }, 
-              ),
-              SizedBox(height: getProportionateScreenHeight(20)),
-              DropdownButtonFormField(
-                decoration: const InputDecoration(
-                   labelText: "City",
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            suffixIcon: CustomSurffixIcon(svgIcon: "assets/icons/Location point.svg"),
-                ),
-                value: value2,
-                hint: const Text("-Select Country-"),
-                items: const [
-                  DropdownMenuItem(value: "-1", child: Text('Abuja')),
-                  DropdownMenuItem(value: "2", child: Text('Kano')),
-                ], onChanged: (value) { 
-                   setState(() {
-                    value = value2;
-                  });
-                 }, 
-              ),
+            DropdownButtonFormField<String>(
+        decoration: const InputDecoration(
+          labelText: "Country",
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          suffixIcon: CustomSurffixIcon(svgIcon: "assets/icons/Location point.svg"),
+        ),
+        value: selectedCountry,
+        hint: const Text("-Select Country-"),
+        items: const [
+          DropdownMenuItem<String>(value: "Nigeria", child: Text('Nigeria')),
+          DropdownMenuItem<String>(value: "United Kingdom", child: Text('United Kingdom')),
+        ],
+        onChanged: (String? value) {
+          setState(() {
+            selectedCountry = value;
+            selectedCity = null; // Reset city when country changes
+          });
+        },
+      ),
+      SizedBox(height: getProportionateScreenHeight(20)),
+      DropdownButtonFormField<String>(
+        decoration: const InputDecoration(
+          labelText: "City",
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          suffixIcon: CustomSurffixIcon(svgIcon: "assets/icons/Location point.svg"),
+        ),
+        value: selectedCity,
+        hint: const Text("-Select City-"),
+        items: selectedCountry != null
+            ? getStatesByCountry(selectedCountry!).map((String city) {
+                return DropdownMenuItem<String>(value: city, child: Text(city));
+              }).toList()
+            : [],
+        onChanged: (String? value) {
+          setState(() {
+            selectedCity = value;
+          });
+        },
+      ),
               SizedBox(height: getProportionateScreenHeight(20)),
               TextFormField(
                 controller: _addressController,
