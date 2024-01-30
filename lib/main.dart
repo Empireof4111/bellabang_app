@@ -2,12 +2,14 @@ import 'dart:io';
 import 'dart:ui' show PointerDeviceKind;
 import 'package:bella_banga/boxes.dart';
 import 'package:bella_banga/routes.dart';
+import 'package:bella_banga/src/controller/dependency_injection.dart';
 import 'package:bella_banga/src/model/local_storage_model/addtocartmodel.dart';
 import 'package:bella_banga/src/provider/user_provider.dart';
 import 'package:bella_banga/src/view/screen/home_screen.dart';
 import 'package:bella_banga/src/view/screen/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bella_banga/core/app_theme.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,10 +39,10 @@ void main() async{
   if(await userProvider.isLoggedIn){
       await userProvider.loadUserFromSharedPreferences();
     }
+
+  DependencyInjection.init();
+
   runApp(MultiProvider(providers: [
-    // ChangeNotifierProvider(
-    //   create: (context) => UserProvider(),
-    // )
     ChangeNotifierProvider.value(value: userProvider),
   ], child: const MyApp())
 );
@@ -68,7 +70,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
         scrollBehavior: const MaterialScrollBehavior().copyWith(
           dragDevices: {
             PointerDeviceKind.mouse,

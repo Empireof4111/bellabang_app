@@ -8,7 +8,6 @@ import 'package:bella_banga/src/services/auth_services.dart';
 import 'package:bella_banga/core/size_config.dart';
 import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class OtpScreen extends StatefulWidget {
   final  email;
@@ -201,10 +200,7 @@ void RegenerateOtp(){
             ],
           ),
           SizedBox(height: SizeConfig.screenHeight * 0.15),
-          isLoading  ? const SpinKitFadingCircle(
-              color: AppColor.darkOrange,
-              size: 50,
-            ) :DefaultButton(
+           isLoading  ?  const Center(child: MyProgressor(),): DefaultButton(
             text: "Continue",
             press: () async {
               if (_formKey.currentState!.validate()) {
@@ -213,10 +209,6 @@ void RegenerateOtp(){
                     isLoading = true;
                   });
                   VerifyUser();
-                  await Future.delayed(const Duration(seconds: 3));
-                  setState(() {
-                    isLoading = false;
-                  });
                   // ignore: use_build_context_synchronously
                   KeyboardUtil.hideKeyboard(context);
                 }

@@ -31,7 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     User? user = Provider.of<UserProvider>(context).user;
-    print(user.name);
     return PageWrapper(
       child: Scaffold(
         bottomNavigationBar: BottomNavyBar(

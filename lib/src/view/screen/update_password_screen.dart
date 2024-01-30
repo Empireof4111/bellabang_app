@@ -3,6 +3,7 @@
 
 import 'package:bella_banga/core/keyboard.dart';
 import 'package:bella_banga/src/services/auth_services.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bella_banga/core/constant.dart';
@@ -62,7 +63,7 @@ authService.updatePassword(context: context, email: widget.email, password: _pas
     }
   }
 
-
+bool isLoading = false;
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
@@ -159,11 +160,14 @@ authService.updatePassword(context: context, email: widget.email, password: _pas
             SizedBox(height: getProportionateScreenHeight(30)),
             FormError(errors: errors),
             SizedBox(height: getProportionateScreenHeight(20)),
-            DefaultButton(
+            isLoading  ?  const Center(child: MyProgressor(),): DefaultButton(
               text: "Update",
               press: () {
                 if (_formKey.currentState!.validate()) {
                   _formKey.currentState!.save();
+                  setState(() {
+                    isLoading = true;
+                  });
                   KeyboardUtil.hideKeyboard(context);
                   changePassword();
                 }

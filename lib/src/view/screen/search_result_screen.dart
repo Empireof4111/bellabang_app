@@ -165,7 +165,7 @@ class _SearchProductCardState extends State<SearchProductCard> {
                       fontWeight: FontWeight.bold,
                     )) : const Text("Loading.."),
                     const SizedBox(width: 10,),
-                     Text('${widget.searchProductList?[index].price.toString()}',
+                     Text('${currencySymbolConveeter(currencyChoosed)}${basedCurrencyConvertion(widget.searchProductList![index].currencyCode.toString(), widget.searchProductList![index].price as double, newExchangeRates)!.toStringAsFixed(2)}',
                      style: const TextStyle(
                         decoration: TextDecoration.lineThrough,
                         color: Colors.grey,

@@ -1,5 +1,4 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
-import 'package:bella_banga/core/app_color.dart';
 import 'package:bella_banga/core/constant.dart';
 import 'package:bella_banga/core/custom_surfix_icon.dart';
 import 'package:bella_banga/core/default_button.dart';
@@ -7,8 +6,8 @@ import 'package:bella_banga/core/form_error.dart';
 import 'package:bella_banga/core/keyboard.dart';
 import 'package:bella_banga/src/services/auth_services.dart';
 import 'package:bella_banga/core/size_config.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
    const ForgotPasswordScreen({super.key});
@@ -114,10 +113,7 @@ final TextEditingController _emailController = TextEditingController();
           SizedBox(height: getProportionateScreenHeight(30)),
           FormError(errors: errors),
           SizedBox(height: SizeConfig.screenHeight * 0.1),
-           isLoading  ? const SpinKitFadingCircle(
-              color: AppColor.darkOrange,
-              size: 50,
-            ) : DefaultButton(
+          isLoading  ?  const Center(child: MyProgressor(),):  DefaultButton(
             text: "Continue",
             press: () async {
              if (_formKey.currentState!.validate()) {
@@ -126,10 +122,6 @@ final TextEditingController _emailController = TextEditingController();
                         isLoading = true;
                       });
                       forgotPassword();
-                      await Future.delayed(const Duration(seconds: 3));
-                      setState(() {
-                        isLoading = false;
-                      });
                       // ignore: use_build_context_synchronously
                       KeyboardUtil.hideKeyboard(context);
                     }

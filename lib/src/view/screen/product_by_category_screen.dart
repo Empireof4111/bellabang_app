@@ -44,10 +44,10 @@ final ProductServices productServices = ProductServices();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+        appBar: AppBar(
         foregroundColor: Colors.white,
         backgroundColor: AppColor.lightOrange,
-        title:  Text(product?[0].categoryName.toString() ?? 'Shop by....', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))
+        title: const Text( 'Shop by category', style:TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))
       ),
       body:  product == null ? const Center(child: MyProgressor(),) :
       Padding(

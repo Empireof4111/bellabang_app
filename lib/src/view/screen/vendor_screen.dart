@@ -40,17 +40,18 @@ List<VendorModel>? vendorList;
 
   @override
   Widget build(BuildContext context) {
-      if(vendorList == null){
-            return const Center(child: MyProgressor());
-    }else if(vendorList!.isEmpty){
-            return const Center(child: Text('Product Not Found'));
-    }else{
+    //   if(vendorList == null){
+    //         return const Center(child: MyProgressor());
+    // }else if(vendorList!.isEmpty){
+    //         return const Center(child: Text('Product Not Found'));
+    // }else{
     return Scaffold(
       appBar: AppBar(
+        foregroundColor: Colors.white,
         backgroundColor: AppColor.lightOrange,
-        title: Text("Shop by vendor", style: Theme.of(context).textTheme.displayLarge,),
+        title: const Text( 'Vendors', style:TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))
       ),
-      body:     
+      body: vendorList == null ? const Center(child: MyProgressor()) :    
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: GridView.builder(
@@ -73,7 +74,7 @@ List<VendorModel>? vendorList;
         
 
 
-    );}
+    );
   }
 }
 

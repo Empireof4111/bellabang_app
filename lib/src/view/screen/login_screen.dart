@@ -9,10 +9,10 @@ import 'package:bella_banga/core/keyboard.dart';
 import 'package:bella_banga/core/social_card.dart';
 import 'package:bella_banga/src/services/auth_services.dart';
 import 'package:bella_banga/core/size_config.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:bella_banga/src/view/screen/forgot_password_screen.dart';
 import 'package:bella_banga/src/view/screen/sign_up_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -187,10 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             FormError(errors: errors),
             SizedBox(height: getProportionateScreenHeight(20)),
-            isLoading  ? SpinKitFadingCircle(
-              color: AppColor.darkOrange,
-              size: 50,
-            ) :  DefaultButton(
+            isLoading  ?  Center(child: MyProgressor(),):  DefaultButton(
               text: "Continue",
               press: () async {
                 if (_formKey.currentState!.validate()) {
@@ -199,11 +196,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     isLoading = true;
                   });
                   SignIn();
-                  // Navigator.pushNamed(context, HomeScreen.routeName);
-                  await Future.delayed(const Duration(seconds: 3));
-                  setState(() {
-                    isLoading = false;
-                  });
                   // ignore: use_build_context_synchronously
                   KeyboardUtil.hideKeyboard(context);
                 }

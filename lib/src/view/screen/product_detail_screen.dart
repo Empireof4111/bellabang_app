@@ -37,7 +37,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
  int size = 20;
 
     void fetchAllProductCategoryById() async {
-    productByCategory = await productServices.fetchAllProductsByCategory(context, widget.product.id as int, page = page, size = size);
+    productByCategory = await productServices.fetchAllProductsByCategory(context, widget.product.categoryId as int, page = page, size = size);
     setState(() {
       
     });
@@ -208,15 +208,9 @@ int productQuantity = 1;
                       ),
                       const SizedBox(height: 10),
                       Text(widget.product.description.toString(), textAlign: TextAlign.justify,),
-                      const SizedBox(height: 20),
-                      const SizedBox(
-                        height: 40,
-                        // child:
-                        //   builder: (_) => productSizesListView(),
-                        
-                      ),
-                      const SizedBox(height: 20),
-                      SearchProductCard(productByCategory: productByCategory,)
+                      const SizedBox(height: 30),
+                     Text("Related Product", style: Theme.of(context).textTheme.headlineMedium,), 
+                     SearchProductCard(productByCategory: productByCategory,)
                     ],
                   ),
                 )
@@ -297,39 +291,37 @@ class _SearchProductCardState extends State<SearchProductCard> {
   
   @override
   Widget build(BuildContext context) {
-    return widget.productByCategory == null ? const MyProgressor() : Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10,),
-      child: GridView.builder(
-      itemCount: (widget.productByCategory == null)? 0 : widget.productByCategory!.length,
-        shrinkWrap: true,
-        physics: const ScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          childAspectRatio: 10 / 12,
-          crossAxisCount: 2,
-          mainAxisSpacing: 0,
-          crossAxisSpacing: 10,
-        ),
-        itemBuilder: (_, index) {
-          // double? newProductPice =   basedCurrencyConvertion(currencyChoosed, widget.searchProductList?[index].price as double,newExchangeRates);   
-          return GestureDetector(
-            onTap: (){
-              Navigator.pushNamed(context, ProductDetailScreen.routeName, arguments: widget.productByCategory![index]);
-            },
-            child: Column(
-              crossAxisAlignment:  CrossAxisAlignment.start,
-              children: [
-                Container(
+    return widget.productByCategory == null ? const MyProgressor() : GridView.builder(
+    itemCount: (widget.productByCategory == null)? 0 : widget.productByCategory!.length,
+      shrinkWrap: true,
+      physics: const ScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        childAspectRatio: 10 / 12,
+        crossAxisCount: 2,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 10,
+      ),
+      itemBuilder: (_, index) { 
+       return GestureDetector(
+          onTap: (){
+            Navigator.pushNamed(context, ProductDetailScreen.routeName, arguments: widget.productByCategory![index]);
+          },
+          child: Column(
+            crossAxisAlignment:  CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Container(
                   clipBehavior: Clip.hardEdge,
-                  height: 150,
-                  width: 200,
-                  decoration: const BoxDecoration(
+                  width: 250,
+                  decoration:  const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
+                  // border: Border.all(width: 0.5, color: AppColor.lightGrey),
                   boxShadow: [
                   BoxShadow(
                     color: AppColor.lightGrey,
                     blurRadius: 25.0, // soften the shadow
-                    spreadRadius: 1.0, //extend the shadow
+                    spreadRadius: 0.02, //extend the shadow
                     offset: Offset(
                       0.0, // Move to right 10  horizontally
                       0.0, // Move to bottom 10 Vertically
@@ -339,56 +331,66 @@ class _SearchProductCardState extends State<SearchProductCard> {
                 ),
                 child: Image.network(fit: BoxFit.fill, scale: 1, "$imageUrl${widget.productByCategory![index].thumbnail.toString()}" ),
                  ),
-                  
-              Container(
-                width: 200,
-                  decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10)),
-                ),
-                 padding: const EdgeInsets.symmetric(horizontal: 4),
-                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                     children: [
-                       Text(widget.productByCategory![index].name.toString(), 
-                        style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),),
-                                      
-                 Row(
+              ),
+            Container(
+              width: 200,
+              height: 50,
+                decoration: BoxDecoration(
+                border: Border.all(width: 0.5, color: AppColor.lightGrey),
+                color: Colors.white,
+                borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10)),
+                boxShadow: const [
+                BoxShadow(
+                  color: AppColor.lightGrey,
+                  blurRadius: 25.0, // soften the shadow
+                  spreadRadius: 0.02, //extend the shadow
+                  offset: Offset(
+                    0.0, // Move to right 10  horizontally
+                    0.0, // Move to bottom 10 Vertically
+                  ),
+                )]
+              ),
+               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                    children: [
-                   newExchangeRates.isNotEmpty ? Text('${currencySymbolConveeter(currencyChoosed)}${basedCurrencyConvertion(widget.productByCategory![index].currencyCode.toString(), widget.productByCategory![index].price as double, newExchangeRates)!.toStringAsFixed(2)}', 
-                    style: const TextStyle(
-                      color: Colors.red,
+                     Text(widget.productByCategory![index].name.toString(), 
+                      style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),),
+                                    
+               Row(
+                 children: [
+                 newExchangeRates.isNotEmpty ? Text('${currencySymbolConveeter(currencyChoosed)}${basedCurrencyConvertion(widget.productByCategory![index].currencyCode.toString(), widget.productByCategory![index].price as double, newExchangeRates)!.toStringAsFixed(2)}', 
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  )) : const Text("Loading.."),
+                  const SizedBox(width: 10,),
+                   Text('${currencySymbolConveeter(currencyChoosed)}${basedCurrencyConvertion(widget.productByCategory![index].currencyCode.toString(), widget.productByCategory![index].price as double, newExchangeRates)!.toStringAsFixed(2)}',
+                   style: const TextStyle(
+                      decoration: TextDecoration.lineThrough,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
                       fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    )) : const Text("Loading.."),
-                    const SizedBox(width: 10,),
-                     Text('${widget.productByCategory?[index].price.toString()}',
-                     style: const TextStyle(
-                        decoration: TextDecoration.lineThrough,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                     ),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                   ),
+                 ],
+               ),
                    ],
                  ),
+               ),
               
-                     ],
-                   ),
-                 ),
-
-
-              ],
-            ),
-          );
-        },
-      
-      ),
+              
+            ],
+          ),
+        );
+      },
+    
     );
   }
 }

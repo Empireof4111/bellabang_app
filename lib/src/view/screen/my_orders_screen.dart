@@ -161,6 +161,7 @@ class _OrderCardState extends State<OrderCard> {
 
 
 
+  // ignore: unused_element
   Widget _ratingBar(BuildContext context) {
     return Wrap(
       spacing: 10,

@@ -27,17 +27,16 @@ List<CategoryModel>? categories;
     void fetchAllProductCategory() async {
     categories = await productServices.fetchAllCategory(context);
     setState(() {
-      // print((categories![0].category!.name));
-      // print((categories!.length));
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+     appBar: AppBar(
+        foregroundColor: Colors.white,
         backgroundColor: AppColor.lightOrange,
-        title: const Text('Categories', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+        title: const Text( 'Category', style:TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))
       ),
       body: categories == null ? const Center(child: MyProgressor(),) : Padding(
         padding: const EdgeInsets.all(20),

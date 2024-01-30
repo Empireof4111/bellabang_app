@@ -111,8 +111,6 @@ void updateProfile()async{
 
   @override
   Widget build(BuildContext context) {
-    print(selectedCountry);
-    print(selectedCity);
     return  Scaffold(
       appBar: AppBar(
         foregroundColor: Colors.white,

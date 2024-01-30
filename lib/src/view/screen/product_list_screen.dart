@@ -188,7 +188,7 @@ List<Map<String, dynamic>> newExchangeRates = [];
                 HeaderTitle(seeAll: "SEE ALL", title: "Shop by vendors", press: (){
                   Navigator.pushNamed(context, VendorScreen.routeName);
                 }),
-                Container(
+               vendorList == null ? const Center(child: MyProgressor(),) : Container(
   height: 100,
   color: Colors.transparent,
   child:  ListView.builder(
@@ -248,7 +248,7 @@ List<Map<String, dynamic>> newExchangeRates = [];
                   Navigator.pushNamed(context, CategoryScreen.routName);
                 }),
                 //TOP CATEGORY
-                Container(
+                  categories == null ? const Center(child: MyProgressor(),) : Container(
                   height: 80,
                   color: Colors.transparent,
                  child: GridView.builder(
@@ -272,7 +272,7 @@ List<Map<String, dynamic>> newExchangeRates = [];
                  Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: 
-                  GridView.builder(
+                 product == null ? const Center(child: MyProgressor(),) : GridView.builder(
                   itemCount: (product == null)? 0 : product!.length,
                     shrinkWrap: true,
                     physics: const ScrollPhysics(),
