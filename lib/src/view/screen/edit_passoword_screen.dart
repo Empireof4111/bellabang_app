@@ -6,8 +6,8 @@ import 'package:bella_banga/core/form_error.dart';
 import 'package:bella_banga/core/keyboard.dart';
 import 'package:bella_banga/core/size_config.dart';
 import 'package:bella_banga/src/services/auth_services.dart';
+import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class EditPasswordScreen extends StatefulWidget {
   static const String routeName = '/update-password';
@@ -174,10 +174,7 @@ TextFormField(
 
               FormError(errors: errors),
               SizedBox(height: getProportionateScreenHeight(40)),
-              isLoading  ? const SpinKitFadingCircle(
-              color: AppColor.darkOrange,
-              size: 50,
-            ) : DefaultButton(
+               isLoading  ?  const Center(child: MyProgressor(),): DefaultButton(
                 text: "Continue",
                 press: () async {
                   if (_formKey.currentState!.validate()) {
@@ -186,7 +183,7 @@ TextFormField(
                         isLoading = true;
                       });
                       changePassword();
-                      await Future.delayed(const Duration(seconds: 3));
+                      await Future.delayed(const Duration(seconds: 5));
                       setState(() {
                         isLoading = false;
                       });

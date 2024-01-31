@@ -80,11 +80,14 @@ class AuthService {
         response: res,
         context: context,
         onSuccess: () {
-          showSnackBar(context, 'Register Successifull'); 
+        if(jsonDecode(res.body)['success']){
+        showSnackBar(context, jsonDecode(res.body)['message']);
         String mailToVerify = (res.body);
         var outPut = jsonDecode(mailToVerify);
-        print(outPut);
-          Navigator.pushNamed(context, OtpScreen.routeName, arguments: outPut['payload']['email']!);
+        Navigator.pushNamed(context, OtpScreen.routeName, arguments: outPut['payload']['email']!);
+        }else{
+          showSnackBar(context, jsonDecode(res.body)['message']);
+        }
         },
       );
     } catch (e) {
@@ -110,17 +113,22 @@ class AuthService {
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
+      print(res.body);
       httpErrorHandle(
         response: res,
         context: context,
         onSuccess: () async {
-          showSnackBar(context, jsonDecode(res.body)['message']);
+          if(jsonDecode(res.body)['success']){
+            showSnackBar(context, jsonDecode(res.body)['message']);
           SharedPreferences prefs = await SharedPreferences.getInstance();
           Provider.of<UserProvider>(context, listen: false).setUser((res.body));
         await Provider.of<UserProvider>(context, listen: false).saveUserToSharedPreferences(); ///Acccessing the main key User
           prefs.setString('Bearer', jsonDecode(res.body)['bearer']);
           Navigator.restorablePushNamedAndRemoveUntil(
               context, HomeScreen.routeName, (route) => false);
+          }else{
+            showSnackBar(context, jsonDecode(res.body)['message']);
+          }    
         },
       );
     } catch (e) {
@@ -162,7 +170,7 @@ void verifyUser({
         response: res,
         context: context,
         onSuccess: () async {
-         showSnackBar(context, "Your account verified");
+          showSnackBar(context, jsonDecode(res.body)['message']);
           Navigator.restorablePushNamedAndRemoveUntil(
               context, LoginScreen.routeName, (route) => false);
         },
@@ -308,13 +316,18 @@ void verifyUser({
         response: res,
         context: context,
         onSuccess: () async {
-         showSnackBar(context, "Otp Sent");
+          if(jsonDecode(res.body)['success']){
           Navigator.pushNamed(context, OtpScreen.routeName, arguments: email);
+          showSnackBar(context, jsonDecode(res.body)['payload']);
+          }else{
+          showSnackBar(context, jsonDecode(res.body)['message']);
+          }
+
         },
       );
     } catch (e) {
-      print(e);
-      // showSnackBar(context, e.toString());
+      // print(e);
+      showSnackBar(context, e.toString());
     }
   }
 

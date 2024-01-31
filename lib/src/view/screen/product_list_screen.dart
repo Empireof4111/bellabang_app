@@ -74,11 +74,6 @@ List<Map<String, dynamic>> newExchangeRates = [];
     });
   }
 
-// {"message":"Unable to initiate order","success":false,"payload":null}
-
-
-  //Search Product
-
 
     void fetchAllVendors() async {
     vendorList = await authService.fetchAllVendors(context, 0, 20);
@@ -86,7 +81,6 @@ List<Map<String, dynamic>> newExchangeRates = [];
     });
   }
 
-  bool shimmer = false;
 
   @override
   Widget build(BuildContext context) {  
@@ -120,14 +114,8 @@ List<Map<String, dynamic>> newExchangeRates = [];
                   ],
                 ),
                 Row(
-                  children: [
-              //  GestureDetector(
-              //   onTap: (){
-        
-              //   },
-              //   child: const Icon(Icons.chat, color: Colors.white,),),
-              //  const SizedBox(width: 10,),
-               
+                  children: [ 
+                  const SizedBox(width: 10,),
                    DropdownButton(
                     dropdownColor: AppColor.lightOrange,
                     iconEnabledColor: Colors.white,

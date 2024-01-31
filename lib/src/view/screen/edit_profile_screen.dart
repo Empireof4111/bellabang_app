@@ -13,7 +13,6 @@ import 'package:bella_banga/src/services/auth_services.dart';
 import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
@@ -314,10 +313,7 @@ void updateProfile()async{
               ),
               FormError(errors: errors),
               SizedBox(height: getProportionateScreenHeight(40)),
-               isLoading  ? const SpinKitFadingCircle(
-              color: AppColor.darkOrange,
-              size: 50,
-            ) :DefaultButton(
+               isLoading  ?  const Center(child: MyProgressor(),): DefaultButton(
                 text: "Update",
                 press: () async {
                   if (_formKey.currentState!.validate()) {
@@ -327,7 +323,7 @@ void updateProfile()async{
                       });
                       updateProfile();
                       // Navigator.pushNamed(context, HomeScreen.routeName);
-                      await Future.delayed(const Duration(seconds: 3));
+                      await Future.delayed(const Duration(seconds: 5));
                       setState(() {
                         isLoading = false;
                       });

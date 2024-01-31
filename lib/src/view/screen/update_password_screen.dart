@@ -162,7 +162,7 @@ bool isLoading = false;
             SizedBox(height: getProportionateScreenHeight(20)),
             isLoading  ?  const Center(child: MyProgressor(),): DefaultButton(
               text: "Update",
-              press: () {
+              press: () async {
                 if (_formKey.currentState!.validate()) {
                   _formKey.currentState!.save();
                   setState(() {
@@ -170,6 +170,10 @@ bool isLoading = false;
                   });
                   KeyboardUtil.hideKeyboard(context);
                   changePassword();
+                   await Future.delayed(const Duration(seconds: 2));
+                  setState(() {
+                    isLoading = false;
+                  });
                 }
               },
             ),

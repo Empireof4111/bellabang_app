@@ -56,7 +56,7 @@ class _OtpScreenState extends State<OtpScreen> {
     pin4FocusNode!.dispose();
     pin5FocusNode!.dispose();
     pin6FocusNode!.dispose();
-    pin7FocusNode!.dispose();
+    pin7FocusNode?.dispose();
   }
 
   void nextField(String value, FocusNode? focusNode) {
@@ -91,11 +91,11 @@ void RegenerateOtp(){
             children: [
               SizedBox(height: SizeConfig.screenHeight * 0.05),
              const Text(
-                "OTP Verification",
-                // style: headingStyle,
+                "We sent your code to",
+              style: TextStyle(fontSize: 18),
               ),
-             Text("We sent your code to your ${widget.email}"),
-              buildTimer(),
+             Text( widget.email),
+              // buildTimer(),
               Form(
                 key: _formKey,
       child: Column(
@@ -209,6 +209,10 @@ void RegenerateOtp(){
                     isLoading = true;
                   });
                   VerifyUser();
+                   await Future.delayed(const Duration(seconds: 5));
+                  setState(() {
+                    isLoading = false;
+                  });
                   // ignore: use_build_context_synchronously
                   KeyboardUtil.hideKeyboard(context);
                 }

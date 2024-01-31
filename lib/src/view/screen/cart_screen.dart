@@ -33,12 +33,12 @@ final GlobalKey<_CheckOutSectionState> checkoutSectionKey =
   String currencyProductCode = "USD";
 
 class _CartScreenState extends State<CartScreen> {
-  PreferredSizeWidget _appBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: AppColor.lightOrange,
-        title: const Text('My cart', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-    );
-  }
+  // PreferredSizeWidget _appBar(BuildContext context) {
+  //   return AppBar(
+  //     backgroundColor: AppColor.lightOrange,
+  //       title: const Text('My cart', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+  //   );
+  // }
 
 late double total = 0.0;
 void calculateTotalPrice() {
@@ -79,7 +79,11 @@ void calculateTotalPrice() {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _appBar(context),
+      appBar: AppBar(
+        foregroundColor: Colors.white,
+        backgroundColor: AppColor.lightOrange,
+        title: const Text( 'Shop by vendor', style:TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))
+      ),
       body:  SingleChildScrollView(
         child: 
         Column(

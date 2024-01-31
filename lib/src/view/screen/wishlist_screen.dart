@@ -71,23 +71,10 @@ void deleteAllList() async {
   User user = Provider.of<UserProvider>(context).user;
     newUserId = user.id!;
     return Scaffold(
-      appBar: AppBar(
+       appBar: AppBar(
+        foregroundColor: Colors.white,
         backgroundColor: AppColor.lightOrange,
-        title: const Text(
-          'My Wishlist',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        leading: GestureDetector(
-          onTap: () => {
-            Navigator.pop(
-              context,
-            )
-          },
-          child: const Icon(
-            Icons.arrow_back_ios,
-            color: Colors.white,
-          ),
-        ),
+        title: const Text( 'My Wish List', style:TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))
       ),
       body:   FutureBuilder(
         future:  myWishList(),

@@ -30,7 +30,7 @@ final TextEditingController _emailController = TextEditingController();
   _emailController.dispose();
   }
 
-  void forgotPassword(){
+  void forgotPassword() async {
     authService.regenarateOtp(context: context, email: _emailController.text);
   }
 
@@ -122,6 +122,12 @@ final TextEditingController _emailController = TextEditingController();
                         isLoading = true;
                       });
                       forgotPassword();
+
+                     await Future.delayed(const Duration(seconds: 5));
+                  setState(() {
+                    isLoading = false;
+                  });
+                        
                       // ignore: use_build_context_synchronously
                       KeyboardUtil.hideKeyboard(context);
                     }

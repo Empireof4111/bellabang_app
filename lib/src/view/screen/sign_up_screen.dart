@@ -1,5 +1,6 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers, non_constant_identifier_names, avoid_returning_null_for, avoid_returning_null_for_void
 
+import 'package:bella_banga/core/app_color.dart';
 import 'package:bella_banga/core/constant.dart';
 import 'package:bella_banga/core/custom_surfix_icon.dart';
 import 'package:bella_banga/core/default_button.dart';
@@ -91,8 +92,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return
     Scaffold(
-      appBar: AppBar(
-        title: const Text("Sign Up", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+       appBar: AppBar(
+        foregroundColor: Colors.white,
+        backgroundColor: AppColor.lightOrange,
+        title: const Text( 'Sign Up', style:TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))
       ),
       body: SafeArea(
         child: SizedBox(
@@ -107,7 +110,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Image.asset('assets/images/logo.jpg', width: 100,),
                   SizedBox(height: SizeConfig.screenHeight * 0.01),
                   // const SizedBox(height: 16),
-                  Text("Register Account", style:TextStyle(
+                  Text("Sign Up", style:TextStyle(
                       color: Colors.black,
                       fontSize: getProportionateScreenWidth(28),
                       fontWeight: FontWeight.bold,
@@ -338,6 +341,10 @@ Form(
                     isLoading = true;
                   });
                   SignUp();
+                   await Future.delayed(const Duration(seconds: 5));
+                  setState(() {
+                    isLoading = false;
+                  });
                   // ignore: use_build_context_synchronously
                   KeyboardUtil.hideKeyboard(context);
                 }

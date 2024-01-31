@@ -47,23 +47,10 @@ void orderByOrderId()async{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+       appBar: AppBar(
+        foregroundColor: Colors.white,
         backgroundColor: AppColor.lightOrange,
-          title: const Text(
-            'Track Order',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          leading: GestureDetector(
-            onTap: () => {
-              Navigator.pop(
-                context,
-              )
-            },
-            child: const Icon(
-              Icons.arrow_back_ios,
-              color: Colors.white,
-            ),
-          ),
+        title: const Text( 'Track Order', style:TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))
       ),
 
       body: orderByIdList == null ? const Center(child: MyProgressor(),) : SingleChildScrollView(

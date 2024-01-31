@@ -107,7 +107,7 @@ Future<void> showLoading(String message) {
   }
 
 
-
+ bool isLoading = false;
     
   @override
   Widget build(BuildContext context) {
@@ -136,8 +136,7 @@ Future<void> showLoading(String message) {
         isTestMode: true);
     final ChargeResponse response = await flutterwave.charge();
     if(response.status == "cancelled"){
-    http.Response res = await OrderServices.cancelledOrder(resOrderId);
-    print(res.body);
+    await OrderServices.cancelledOrder(resOrderId);
     showLoading(response.status.toString());
     }else{
     showLoading(response.status.toString());
@@ -178,10 +177,10 @@ List<Map<String, dynamic>> processCartBox(Box cartBox) {
     "emailAddress": user.email,
     "phoneNumber": user.mobile,
     "paymentOption": "CARD",
-    "currencyCode": "NGN",
-    "country": "Nigeria",
-    "state": "Abuja Federal Capital Territory",
-    "address": "Lagos",
+    "currencyCode": currencyChoosed,
+    "country": user.country,
+    "state": user.city,
+    "address": user.address,
     "tax": 0,
     "note": "",
     "products": finalResult,
@@ -189,9 +188,8 @@ List<Map<String, dynamic>> processCartBox(Box cartBox) {
       print(payload);
       try {
       http.Response response = await OrderServices.placeOrder(payload);
-      print(jsonDecode(response.body)['message']);
+      // print(jsonDecode(response.body)['message']);
       if (response.statusCode == 200){
-        print(response.body);
         int orderId = jsonDecode(response.body)['payload']['id'];
       resOrderId = orderId;
       handlePaymentInitialization(jsonDecode(response.body)['payload']['totalAmount']);
@@ -412,12 +410,17 @@ appBar:  AppBar(
 
            Padding(
              padding: const EdgeInsets.all(20),
-             child: DefaultButton(
+             child: isLoading  ?  const Center(child: MyProgressor(),): DefaultButton(
                   text: "Continue",
                   press: () async {
-                    print('Hi Guys');
-                    await proceedOrder();
-                    // handlePaymentInitialization(10);
+                     setState(() {
+                    isLoading = true;
+                  });
+                  await proceedOrder();
+                  await Future.delayed(const Duration(seconds: 3));
+                  setState(() {
+                    isLoading = false;
+                  });
                   }
               ),
            ),

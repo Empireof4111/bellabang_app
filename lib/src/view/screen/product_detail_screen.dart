@@ -145,6 +145,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
 
 int productQuantity = 1;
+int cartCount(){
+int cartLenth = 0;
+  setState(() {
+    cartLenth = cartBox.length;
+  });
+  return cartLenth;
+}
 
   @override
   Widget build(BuildContext context) {
@@ -219,37 +226,77 @@ int productQuantity = 1;
           ),
         ),
         bottomNavigationBar: BottomAppBar(
-          padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
           elevation: 10,
           surfaceTintColor: Colors.white,
           shadowColor: AppColor.lightGrey,
           color: Colors.white,
           height: 60,
           child:  
-          SizedBox(
-                        width: double.infinity,
-                        child: DefaultButton(
-                          text: "Add to cart",
-                          press: (){
-                            cartBox.put(
-                              "CartBox_key${widget.product.id}", 
-                              Addtocartmodel(
-                                productName: widget.product.name.toString(), 
-                                productColor: widget.product.colors.toString(), 
-                                productSize: widget.product.sizes.toString(), 
-                                productQuantity: productQuantity,
-                                productPrice: widget.product.price as double,
-                                cartImageUrl: widget.product.images!.split(',')[0].toString(), 
-                                cartShippingFee: widget.product.shippingFees as double, 
-                                cartServiceCharged: widget.product.serviceCharge as double, 
-                                cartCurrencyCode: widget.product.currencyCode.toString(), 
-                                id: widget.product.id as int,
-                                ));
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
 
-                                showSnackBar(context, "${widget.product.name} Added to cart");
-                          },
-                        )
-                      )
+              Stack(
+      children: [
+        GestureDetector(
+          onTap: (){
+            Navigator.pushNamed(context, '/Cart_Screen');
+          },
+          child: Container(
+                  height: 56,
+                  width: 56,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: AppColor.lightOrange,
+                  ),
+                  child: const Icon(Icons.shopping_cart, color: Colors.white,)),
+        ),
+          Positioned(
+          top: 0,
+          right: 10,
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.red, // Replace with your desired color
+            ),
+            child:  Text(
+              cartCount().toString(), // Replace with your badge count
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ],
+    ),
+              
+              SizedBox(
+                            width: 250,
+                            child: DefaultButton(
+                              text: "Add to cart",
+                              press: (){
+                                cartBox.put(
+                                  "CartBox_key${widget.product.id}", 
+                                  Addtocartmodel(
+                                    productName: widget.product.name.toString(), 
+                                    productColor: widget.product.colors.toString(), 
+                                    productSize: widget.product.sizes.toString(), 
+                                    productQuantity: productQuantity,
+                                    productPrice: widget.product.price as double,
+                                    cartImageUrl: widget.product.images!.split(',')[0].toString(), 
+                                    cartShippingFee: widget.product.shippingFees as double, 
+                                    cartServiceCharged: widget.product.serviceCharge as double, 
+                                    cartCurrencyCode: widget.product.currencyCode.toString(), 
+                                    id: widget.product.id as int,
+                                    ));
+              
+                                    showSnackBar(context, "${widget.product.name} Added to cart");
+                              },
+                            )
+                          ),
+            ],
+          )
         ),
       ),
     );

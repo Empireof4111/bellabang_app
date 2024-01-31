@@ -196,6 +196,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     isLoading = true;
                   });
                   SignIn();
+                   await Future.delayed(const Duration(seconds: 2));
+                  setState(() {
+                    isLoading = false;
+                  });
                   // ignore: use_build_context_synchronously
                   KeyboardUtil.hideKeyboard(context);
                 }
