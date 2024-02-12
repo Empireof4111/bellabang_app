@@ -236,21 +236,32 @@ List<Map<String, dynamic>> newExchangeRates = [];
                   Navigator.pushNamed(context, CategoryScreen.routName);
                 }),
                 //TOP CATEGORY
-                  categories == null ? const Center(child: MyProgressor(),) : Container(
-                  height: 80,
-                  color: Colors.transparent,
-                 child: GridView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: (categories == null)? 0 : categories!.length,
-                  itemBuilder: (BuildContext ctx, index){
-                  return TopCategoryCard( categoryName: categories![index].category!.name.toString(), categoryImage: "$imageUrl${categories![index].category?.imageLink}", press: () { 
-                    Navigator.pushNamed(context, ProductByCategoryScreen.routeName, arguments:categories?[index].category!.id);
-                   },);
-                 }, gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                mainAxisSpacing: 1.0,
-                                crossAxisSpacing: 2.0,
-                                crossAxisCount: 1,
-                                childAspectRatio: 1),)
+                
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: getProportionateScreenWidth(10), vertical: getProportionateScreenHeight(10)),
+                    height: 100,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+
+                    ),
+                    child: categories == null ? const Center(child: MyProgressor(),) : Container(
+                    height: 80,
+                    color: Colors.transparent,
+                    child: GridView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: (categories == null)? 0 : categories!.length,
+                    itemBuilder: (BuildContext ctx, index){
+                    return TopCategoryCard( categoryName: categories![index].category!.name.toString(), categoryImage: "$imageUrl${categories![index].category?.imageLink}", press: () { 
+                      Navigator.pushNamed(context, ProductByCategoryScreen.routeName, arguments:categories?[index].category!.id);
+                     },);
+                                     }, gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                  mainAxisSpacing: 1.0,
+                                  crossAxisSpacing: 2.0,
+                                  crossAxisCount: 1,
+                                  childAspectRatio: 1),)
+                    ),
                   ),
 
                   //POPULAR PRODUCT SECTION 
@@ -509,6 +520,7 @@ class TopCategoryCard extends StatelessWidget {
           return Image.asset("assets/images/errorImage.png");
         },),
           ),
+          // const SizedBox(height: 10,),
           Text(categoryName, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),),
         ],
       ),

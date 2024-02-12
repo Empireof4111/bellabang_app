@@ -8,6 +8,7 @@ import 'package:bella_banga/src/services/product_services.dart';
 import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:bella_banga/src/view/screen/cart_screen.dart';
 import 'package:bella_banga/src/view/screen/product_detail_screen.dart';
+import 'package:money_formatter/money_formatter.dart';
 
 class SearchResultScreen extends StatefulWidget {
   final String query;
@@ -110,8 +111,11 @@ class _SearchProductCardState extends State<SearchProductCard> {
           crossAxisSpacing: 10,
         ),
         itemBuilder: (_, index) {
-          // double? newProductPice =   basedCurrencyConvertion(currencyChoosed, widget.searchProductList?[index].price as double,newExchangeRates);   
-          return GestureDetector(
+         double absAmount =  basedCurrencyConvertion(widget.searchProductList![index].currencyCode.toString(), widget.searchProductList![index].price as double, newExchangeRates)!.toDouble();
+        double discountAmount = absAmount+5*(absAmount/100);
+        MoneyFormatter fmf = MoneyFormatter(amount: absAmount);
+        MoneyFormatter discountfmf = MoneyFormatter(amount: discountAmount);
+         return GestureDetector(
             onTap: (){
               Navigator.pushNamed(context, ProductDetailScreen.routeName, arguments: widget.searchProductList![index]);
             },
@@ -156,16 +160,16 @@ class _SearchProductCardState extends State<SearchProductCard> {
                                         fontSize: 16,
                                       ),),
                                       
-                 Row(
+                newExchangeRates.isNotEmpty ?  Row(
                    children: [
-                   newExchangeRates.isNotEmpty ? Text('${currencySymbolConveeter(currencyChoosed)}${basedCurrencyConvertion(widget.searchProductList![index].currencyCode.toString(), widget.searchProductList![index].price as double, newExchangeRates)!.toStringAsFixed(2)}', 
+                   Text('${currencySymbolConveeter(currencyChoosed)}${fmf.output.nonSymbol}', 
                     style: const TextStyle(
                       color: Colors.red,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                    )) : const Text("Loading.."),
+                    )),
                     const SizedBox(width: 10,),
-                     Text('${currencySymbolConveeter(currencyChoosed)}${basedCurrencyConvertion(widget.searchProductList![index].currencyCode.toString(), widget.searchProductList![index].price as double, newExchangeRates)!.toStringAsFixed(2)}',
+                     Text('${currencySymbolConveeter(currencyChoosed)}${discountfmf.output.nonSymbol}',
                      style: const TextStyle(
                         decoration: TextDecoration.lineThrough,
                         color: Colors.grey,
@@ -176,7 +180,7 @@ class _SearchProductCardState extends State<SearchProductCard> {
                       overflow: TextOverflow.ellipsis,
                      ),
                    ],
-                 ),
+                 )  : const Text("Loading.."),
               
                      ],
                    ),

@@ -14,6 +14,7 @@ import 'package:bella_banga/src/model/local_storage_model/addtocartmodel.dart';
 import 'package:flutterwave_standard/flutterwave.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:money_formatter/money_formatter.dart';
 import 'package:provider/provider.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -49,6 +50,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   
 
   late double totalPrice = 0.0;
+
   void calculateTotalPrice() {
     double newTotalPrice = 0.0;
     for (int index = 0; index < cartBox.length; index++) {
@@ -205,7 +207,10 @@ List<Map<String, dynamic>> processCartBox(Box cartBox) {
     calculateTotalShippingFee();
     calculateTotalServcieCharge();
 
-
+  MoneyFormatter newTotalprice = MoneyFormatter(amount: basedCurrencyConvertion(currencyProductCode, totalPrice, newExchangeRates)!.toDouble());
+  MoneyFormatter newTotalShippingFee = MoneyFormatter(amount: basedCurrencyConvertion(currencyProductCode, totalShippingFee, newExchangeRates)!.toDouble());
+  MoneyFormatter newTotalServiceFee = MoneyFormatter(amount: basedCurrencyConvertion(currencyProductCode, totalServiceCharge, newExchangeRates)!.toDouble());
+  MoneyFormatter newTotalAmount = MoneyFormatter(amount: basedCurrencyConvertion(currencyProductCode, totalAmount!, newExchangeRates)!.toDouble());
 return Scaffold(
 appBar:  AppBar(
         backgroundColor: AppColor.lightOrange,
@@ -394,11 +399,11 @@ appBar:  AppBar(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      BillDetailsCard(title: 'Total price', price: "${currencySymbolConveeter(currencyChoosed)}${basedCurrencyConvertion(currencyProductCode, totalPrice, newExchangeRates)!.toStringAsFixed(2)}"),
-                      BillDetailsCard(title: 'Shipping fee', price:"${currencySymbolConveeter(currencyChoosed)}${basedCurrencyConvertion(currencyProductCode, totalShippingFee, newExchangeRates)!.toStringAsFixed(2)}"),
-                      BillDetailsCard(title: 'Service Charges', price: "${currencySymbolConveeter(currencyChoosed)}${basedCurrencyConvertion(currencyProductCode, totalServiceCharge, newExchangeRates)!.toStringAsFixed(2)}"),
+                      BillDetailsCard(title: 'Total price', price: "${currencySymbolConveeter(currencyChoosed)}${newTotalprice.output.nonSymbol}"),
+                      BillDetailsCard(title: 'Shipping fee', price:"${currencySymbolConveeter(currencyChoosed)}${newTotalShippingFee.output.nonSymbol}"),
+                      BillDetailsCard(title: 'Service Charges', price: "${currencySymbolConveeter(currencyChoosed)}${newTotalServiceFee.output.nonSymbol}"),
                     const Divider(height: 30, thickness: 2,),
-                      BillDetailsCard(title: 'Total Amount', price: "${currencySymbolConveeter(currencyChoosed)}${basedCurrencyConvertion(currencyProductCode, totalAmount!, newExchangeRates)!.toStringAsFixed(2)}",),
+                      BillDetailsCard(title: 'Total Amount', price: "${currencySymbolConveeter(currencyChoosed)}${newTotalAmount.output.nonSymbol}",),
                     ],
                   ),
                 ),
@@ -485,8 +490,9 @@ class _CartCardState extends State<CartCard> {
 
   @override
   Widget build(BuildContext context) {
-  double? absCartprice =  basedCurrencyConvertion(widget.currencyCode.toString(), widget.cartProductPrice, newExchangeRates);
-  double? finalTotal = basedCurrencyConvertion(widget.currencyCode.toString(),((widget.cartProductPrice*widget.cartProductQuantity)+(widget.shippingFees)), newExchangeRates);
+ 
+  MoneyFormatter absCartprice = MoneyFormatter(amount: basedCurrencyConvertion(widget.currencyCode.toString(), widget.cartProductPrice, newExchangeRates)!.toDouble());
+  MoneyFormatter finalTotal = MoneyFormatter(amount: basedCurrencyConvertion(widget.currencyCode.toString(),((widget.cartProductPrice*widget.cartProductQuantity)+(widget.shippingFees)), newExchangeRates)!.toDouble());
 
     return Padding(
       padding: const EdgeInsets.only(left: 20, right: 20, top: 5, bottom: 5),
@@ -560,7 +566,7 @@ class _CartCardState extends State<CartCard> {
                                                   color: Colors.black,
                                                   fontWeight: FontWeight.bold),
                         children: <TextSpan>[
-                          TextSpan(text: absCartprice?.toStringAsFixed(2), style: const TextStyle(
+                          TextSpan(text: absCartprice.output.nonSymbol, style: const TextStyle(
                                                   fontSize: 12,
                                                   color: Colors.black,
                                                   fontWeight: FontWeight.bold),),
@@ -580,8 +586,9 @@ class _CartCardState extends State<CartCard> {
                                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.red),
                               ),
                               Text(
-                                finalTotal!.toStringAsFixed(2),
+                                finalTotal.output.nonSymbol,
                                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.red),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),

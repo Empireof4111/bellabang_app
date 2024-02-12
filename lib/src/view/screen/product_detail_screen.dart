@@ -1,15 +1,19 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:bella_banga/src/view/widget/cart_bottom_sheet_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:money_formatter/money_formatter.dart';
+
 import 'package:bella_banga/boxes.dart';
 import 'package:bella_banga/core/app_color.dart';
 import 'package:bella_banga/core/default_button.dart';
+import 'package:bella_banga/core/size_config.dart';
 import 'package:bella_banga/src/model/local_storage_model/addtocartmodel.dart';
 import 'package:bella_banga/src/model/productModel.dart';
 import 'package:bella_banga/src/services/currency_converter_services.dart';
-import 'package:bella_banga/core/size_config.dart';
 import 'package:bella_banga/src/services/product_services.dart';
 import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:bella_banga/src/view/widget/carousel_slider.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:bella_banga/src/view/widget/page_wrapper.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -88,7 +92,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       children: [
         RatingBar.builder(
           itemSize: 25,
-          initialRating: widget.product.ratings ?? 2,
+          initialRating: widget.product.ratings ?? 0,
           direction: Axis.horizontal,
           itemBuilder: (_, __) => const Icon(
             Icons.star,
@@ -97,7 +101,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           onRatingUpdate: (_) {},
         ),
         Text(
-          "(4500 Reviews)",
+          "(${widget.product.reviews ?? '0'} Reviews)",
           style: Theme.of(context)
               .textTheme
               .displaySmall
@@ -143,7 +147,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-
+String currencyProductCode = currencyChoosed;
 int productQuantity = 1;
 int cartCount(){
 int cartLenth = 0;
@@ -153,13 +157,72 @@ int cartLenth = 0;
   return cartLenth;
 }
 
+void increaseQuantity(){
+setState(() {
+ productQuantity++;
+});
+}
+
+void decreaseQuantity(){
+if(productQuantity  == 1){
+   1;
+}else{
+setState(() {
+  productQuantity--;
+});
+}
+}
+
+
+late double total = 0.0;
+void calculateTotalPrice() {
+    double totalPrice = 0.0;
+    for (int index = 0; index < cartBox.length; index++) {
+      Addtocartmodel addtocartmodel = cartBox.getAt(index);
+      totalPrice += addtocartmodel.productPrice * addtocartmodel.productQuantity;
+      totalPrice += addtocartmodel.cartShippingFee; // Add shipping fee
+      currencyProductCode = addtocartmodel.cartCurrencyCode.toString();
+    }
+
+    setState(() {
+      total = totalPrice;
+    });
+
+      // Update CheckOutSection total
+  //  checkoutSectionKey.currentState?.updateTotal(total);
+  }
+
+
+bool isBottomSheetVisible = false; // Track the visibility of BottomSheet
+
+void _showBottomSheet(BuildContext context) {
+    // Show BottomSheet
+    showModalBottomSheet(
+      isScrollControlled:true,
+      useSafeArea: true,
+      showDragHandle: true,
+     constraints: BoxConstraints(
+      maxHeight: MediaQuery.of(context).size.height / 1.1,
+     ),
+      context: context,
+      builder: (BuildContext context) {
+        SizeConfig().init(context);
+        return const CartBottomSheetScreen();
+      },
+    ).then((value) {
+      setState(() {
+        isBottomSheetVisible = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    double? absAmount =  basedCurrencyConvertion(widget.product.currencyCode.toString(), widget.product.price as double, newExchangeRates);
-    double? myShippingfee =  basedCurrencyConvertion(widget.product.currencyCode.toString(), widget.product.shippingFees as double, newExchangeRates);
-    SizeConfig().init(context);
+    double absAmount =  basedCurrencyConvertion(widget.product.currencyCode.toString(), widget.product.price as double, newExchangeRates)!.toDouble();
+    MoneyFormatter fmf = MoneyFormatter(amount: absAmount);
+     SizeConfig().init(context);
     return SafeArea(
       child: Scaffold(
         extendBodyBehindAppBar: true,
@@ -186,7 +249,7 @@ int cartLenth = 0;
                       Row(
                         children: [
                          newExchangeRates.isNotEmpty ? Text( 
-                            "${currencySymbolConveeter(currencyChoosed)} ${absAmount?.toStringAsFixed(2)}",
+                            "${currencySymbolConveeter(currencyChoosed)} ${fmf.output.nonSymbol}",
                             style: Theme.of(context).textTheme.displayLarge,
                           ) : const Text("Loading.."),
                           const SizedBox(width: 3),
@@ -198,16 +261,49 @@ int cartLenth = 0;
                                 decoration: TextDecoration.lineThrough,
                                 color: Colors.grey,
                                 fontWeight: FontWeight.w500,
+                                fontSize: 20
                               ),
                             ),
                           ),
-                          const Spacer(),
-                         newExchangeRates.isNotEmpty ? Text(
-                           "${currencySymbolConveeter(currencyChoosed)}${myShippingfee?.toStringAsFixed(2)}",
-                            style: const TextStyle(fontWeight: FontWeight.w500, color: AppColor.lightOrange),
-                          ) : const Text("Loading.."),
+                         
                         ],
                       ),
+                      const SizedBox(height: 8),
+                      RichText(
+                        text: TextSpan(
+                          text:  "Unit: ",
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.red),
+                          children: <InlineSpan>[
+                              TextSpan(text: widget.product.unit, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.normal)),
+                          ]
+                        )
+                      ),
+                      const SizedBox(height: 20),
+                      const Text("Colors:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16,),),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                                                  height: 40,
+                                                  width: double.infinity,
+                                                   child: ListView.builder(
+                                                    scrollDirection: Axis.horizontal,
+                                                    itemCount: 3,
+                                                    itemBuilder: (_, context){
+                                                    return const ColorCard();
+                                                   }),
+                                                 ),
+                      const SizedBox(height: 20),
+                      const Text("Size:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16,),),
+                      const SizedBox(height: 10),
+                       SizedBox(
+                                                  height: 40,
+                                                  width: double.infinity,
+                                                   child: ListView.builder(
+                                                    scrollDirection: Axis.horizontal,
+                                                    itemCount: 4,
+                                                    itemBuilder: (_, context){
+                                                    return const SizeCard();
+                                                   }),
+                                                 ),
                       const SizedBox(height: 30),
                       Text(
                         "Description",
@@ -215,6 +311,13 @@ int cartLenth = 0;
                       ),
                       const SizedBox(height: 10),
                       Text(widget.product.description.toString(), textAlign: TextAlign.justify,),
+                      const SizedBox(height: 30),
+                      const Divider(height: 2, thickness: 1,),              
+                       const SizedBox(height: 8),
+                      Text("Reviews:", style: Theme.of(context).textTheme.headlineMedium,), 
+                      Text(widget.product.reviews ?? "No reviews found for this product"),
+                      const SizedBox(height: 8),
+                      const Divider(height: 2, thickness: 1,),              
                       const SizedBox(height: 30),
                      Text("Related Product", style: Theme.of(context).textTheme.headlineMedium,), 
                      SearchProductCard(productByCategory: productByCategory,)
@@ -237,63 +340,74 @@ int cartLenth = 0;
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-
-              Stack(
-      children: [
-        GestureDetector(
-          onTap: (){
-            Navigator.pushNamed(context, '/Cart_Screen');
-          },
-          child: Container(
-                  height: 56,
-                  width: 56,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: AppColor.lightOrange,
-                  ),
-                  child: const Icon(Icons.shopping_cart, color: Colors.white,)),
-        ),
-          Positioned(
-          top: 0,
-          right: 10,
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.red, // Replace with your desired color
-            ),
-            child:  Text(
-              cartCount().toString(), // Replace with your badge count
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-        ),
-      ],
-    ),
-              
+                             
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              splashRadius: 10.0,
+                              onPressed: decreaseQuantity,
+                              icon: Container(
+                                height: 30,
+                                width: 30,
+                                decoration: const BoxDecoration(
+                                    color: AppColor.lightGrey,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(5))),
+                                child: const Icon(
+                                  Icons.remove,
+                                  color: AppColor.darkOrange,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              productQuantity.toString(),
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            IconButton(
+                              splashRadius: 10.0,
+                              onPressed: increaseQuantity,
+                              icon: Container(
+                                height: 30,
+                                width: 30,
+                                decoration: const BoxDecoration(
+                                    color: AppColor.lightGrey,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(5))),
+                                child: const Icon(
+                                  Icons.add,
+                                  color: AppColor.darkOrange,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        
               SizedBox(
-                            width: 250,
-                            child: DefaultButton(
+                            width: 200,
+                            child: Builder(builder: ((context) => DefaultButton(
                               text: "Add to cart",
-                              press: (){
-                                cartBox.put(
-                                  "CartBox_key${widget.product.id}", 
-                                  Addtocartmodel(
-                                    productName: widget.product.name.toString(), 
-                                    productColor: widget.product.colors.toString(), 
+                                  press: (){  
+                                     cartBox.put(
+                                    "CartBox_key${widget.product.id}", 
+                                     Addtocartmodel(
+                                     productName: widget.product.name.toString(), 
+                                     productColor: widget.product.colors.toString(), 
                                     productSize: widget.product.sizes.toString(), 
-                                    productQuantity: productQuantity,
-                                    productPrice: widget.product.price as double,
-                                    cartImageUrl: widget.product.images!.split(',')[0].toString(), 
-                                    cartShippingFee: widget.product.shippingFees as double, 
+                                     productQuantity: productQuantity,
+                                     productPrice: widget.product.price as double,
+                                     cartImageUrl: widget.product.images!.split(',')[0].toString(), 
+                                     cartShippingFee: widget.product.shippingFees as double, 
                                     cartServiceCharged: widget.product.serviceCharge as double, 
-                                    cartCurrencyCode: widget.product.currencyCode.toString(), 
-                                    id: widget.product.id as int,
-                                    ));
-              
-                                    showSnackBar(context, "${widget.product.name} Added to cart");
-                              },
-                            )
+                                     cartCurrencyCode: widget.product.currencyCode.toString(), 
+                                     id: widget.product.id as int,
+                                                                              ));
+                                    _showBottomSheet(context);
+                                  })
+                            )),
                           ),
             ],
           )
@@ -303,8 +417,53 @@ int cartLenth = 0;
   }
 }
 
+class ColorCard extends StatelessWidget {
+  const ColorCard({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Container(
+        width: 40,
+        height: 10,
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColor.lightGrey, width: 1),
+          borderRadius: BorderRadius.circular(5),
+          color: AppColor.lightGrey.withOpacity(0.5),
+        ),
+        child: const Center(child: Text("black", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 10),)),
+      ),
+    );
+  }
+}
 
 
+
+class SizeCard extends StatelessWidget {
+  const SizeCard({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Container(
+        width: 40,
+        height: 10,
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColor.lightGrey, width: 1),
+          borderRadius: BorderRadius.circular(5),
+          color: AppColor.lightGrey.withOpacity(0.5),
+        ),
+        child: const Center(child: Text("XL", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 10),)),
+      ),
+    );
+  }
+}
 
 // ignore: must_be_immutable
 class SearchProductCard extends StatefulWidget { 
@@ -338,6 +497,7 @@ class _SearchProductCardState extends State<SearchProductCard> {
   
   @override
   Widget build(BuildContext context) {
+    
     return widget.productByCategory == null ? const MyProgressor() : GridView.builder(
     itemCount: (widget.productByCategory == null)? 0 : widget.productByCategory!.length,
       shrinkWrap: true,
@@ -349,6 +509,10 @@ class _SearchProductCardState extends State<SearchProductCard> {
         crossAxisSpacing: 10,
       ),
       itemBuilder: (_, index) { 
+        double absAmount =  basedCurrencyConvertion(widget.productByCategory![index].currencyCode.toString(), widget.productByCategory![index].price as double, newExchangeRates)!.toDouble();
+        double discountAmount = absAmount+5*(absAmount/100);
+        MoneyFormatter fmf = MoneyFormatter(amount: absAmount);
+        MoneyFormatter discountfmf = MoneyFormatter(amount: discountAmount);
        return GestureDetector(
           onTap: (){
             Navigator.pushNamed(context, ProductDetailScreen.routeName, arguments: widget.productByCategory![index]);
@@ -381,7 +545,7 @@ class _SearchProductCardState extends State<SearchProductCard> {
               ),
             Container(
               width: 200,
-              height: 50,
+              height: 60,
                 decoration: BoxDecoration(
                 border: Border.all(width: 0.5, color: AppColor.lightGrey),
                 color: Colors.white,
@@ -397,7 +561,7 @@ class _SearchProductCardState extends State<SearchProductCard> {
                   ),
                 )]
               ),
-               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                    children: [
@@ -407,16 +571,16 @@ class _SearchProductCardState extends State<SearchProductCard> {
                                       fontSize: 16,
                                     ),),
                                     
-               Row(
+            newExchangeRates.isNotEmpty ?    Row(
                  children: [
-                 newExchangeRates.isNotEmpty ? Text('${currencySymbolConveeter(currencyChoosed)}${basedCurrencyConvertion(widget.productByCategory![index].currencyCode.toString(), widget.productByCategory![index].price as double, newExchangeRates)!.toStringAsFixed(2)}', 
+                 Text('${currencySymbolConveeter(currencyChoosed)}${fmf.output.nonSymbol}', 
                   style: const TextStyle(
                     color: Colors.red,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                  )) : const Text("Loading.."),
+                  )) ,
                   const SizedBox(width: 10,),
-                   Text('${currencySymbolConveeter(currencyChoosed)}${basedCurrencyConvertion(widget.productByCategory![index].currencyCode.toString(), widget.productByCategory![index].price as double, newExchangeRates)!.toStringAsFixed(2)}',
+                   Text('${currencySymbolConveeter(currencyChoosed)}${discountfmf.output.nonSymbol}',
                    style: const TextStyle(
                       decoration: TextDecoration.lineThrough,
                       color: Colors.grey,
@@ -427,7 +591,7 @@ class _SearchProductCardState extends State<SearchProductCard> {
                     overflow: TextOverflow.ellipsis,
                    ),
                  ],
-               ),
+               ) : const Text("Loading.."),
                    ],
                  ),
                ),
@@ -441,3 +605,4 @@ class _SearchProductCardState extends State<SearchProductCard> {
     );
   }
 }
+

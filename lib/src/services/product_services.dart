@@ -191,4 +191,17 @@ Future<List<CategoryModel>> fetchProductCategoryById(BuildContext context, int i
   }
 
 
+
+  Future<List<String>?> fetchReviewData(int id) async {
+    List <String>? reviewList;
+    final response = await http.get(Uri.parse('$basedUrl/api/review/get_by_product_id/$id'));
+    print(response.body);
+    final Map<String, dynamic> data = json.decode(response.body);
+      if(data['success']){
+        reviewList = data['payload'];
+        return reviewList;
+      }else{
+        return [];
+      }
+  }
 }

@@ -124,8 +124,7 @@ class AuthService {
           Provider.of<UserProvider>(context, listen: false).setUser((res.body));
         await Provider.of<UserProvider>(context, listen: false).saveUserToSharedPreferences(); ///Acccessing the main key User
           prefs.setString('Bearer', jsonDecode(res.body)['bearer']);
-          Navigator.restorablePushNamedAndRemoveUntil(
-              context, HomeScreen.routeName, (route) => false);
+          Navigator.pop(context);
           }else{
             showSnackBar(context, jsonDecode(res.body)['message']);
           }    

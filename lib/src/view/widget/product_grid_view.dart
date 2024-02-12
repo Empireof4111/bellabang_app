@@ -7,6 +7,7 @@ import 'package:bella_banga/src/view/screen/login_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bella_banga/core/app_color.dart';
+import 'package:money_formatter/money_formatter.dart';
 import 'package:provider/provider.dart';
 
 class ProductGridView extends StatefulWidget {
@@ -50,12 +51,20 @@ class _ProductGridViewState extends State<ProductGridView> {
       
     });
   }
+//7063853975
+
+
 
 
   List<Map<String, dynamic>> newExchangeRates = [];
 
+
   Widget _gridItemFooter(BuildContext context, double productPrice, String productTitle,) {
-    double? absAmount =  basedCurrencyConvertion(widget.currencyType, productPrice, newExchangeRates);
+    double absAmount =  basedCurrencyConvertion(widget.currencyType, productPrice, newExchangeRates)!.toDouble();
+    double discountAmount = absAmount+5*(absAmount/100);
+    MoneyFormatter fmf = MoneyFormatter(amount: absAmount);
+    MoneyFormatter discountfmf = MoneyFormatter(amount: discountAmount);
+// print(fmf.output.nonSymbol);
     return Padding(
       padding: const EdgeInsets.all(0),
       child: Container(
@@ -85,7 +94,7 @@ class _ProductGridViewState extends State<ProductGridView> {
               ),
             ),
             const SizedBox(height: 5),
-            Row(
+           newExchangeRates.isNotEmpty ?  Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
@@ -98,7 +107,8 @@ class _ProductGridViewState extends State<ProductGridView> {
                       fontWeight: FontWeight.bold,
                     )),
               Text(
-                 "${absAmount!.toStringAsFixed(2)} ",
+                // formatter.format(absAmount!.toStringAsFixed(2)),
+                (fmf.output.nonSymbol),
                     style: const TextStyle(
                       color: Colors.red,
                       fontSize: 12,
@@ -110,9 +120,7 @@ class _ProductGridViewState extends State<ProductGridView> {
                   child: SizedBox(
                     width: 40,
                     child: Text(
-                    "${currencySymbolConveeter(currencyChoosed)}${(absAmount + 5 * (absAmount/100)).toStringAsFixed(2)}",
-                      
-                      // (absAmount + 5 * (absAmount/100)).toStringAsFixed(2),
+                      "${currencySymbolConveeter(currencyChoosed)}${discountfmf.output.nonSymbol}",
                       style: const TextStyle(
                         decoration: TextDecoration.lineThrough,
                         color: Colors.grey,
@@ -125,7 +133,7 @@ class _ProductGridViewState extends State<ProductGridView> {
                   ),
                 )
               ],
-            )
+            ) : const Text('Loading..')
           ],
         ),
       ),

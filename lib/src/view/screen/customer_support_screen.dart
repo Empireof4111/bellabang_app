@@ -7,33 +7,31 @@ import 'package:bella_banga/core/default_button.dart';
 import 'package:bella_banga/core/form_error.dart';
 import 'package:bella_banga/core/keyboard.dart';
 import 'package:bella_banga/core/size_config.dart';
-import 'package:bella_banga/src/model/userModel.dart';
-import 'package:bella_banga/src/provider/user_provider.dart';
-import 'package:bella_banga/src/services/auth_services.dart';
 import 'package:bella_banga/src/utiliti/utility.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:provider/provider.dart';
 
-class EditProfileScreen extends StatefulWidget {
-  static const String routeName = '/edit-profile';
-  const EditProfileScreen({super.key});
+class CustomerSupportScreen extends StatefulWidget {
+  static const String routeName = "/customer-support";
+  const CustomerSupportScreen({super.key});
 
   @override
-  State<EditProfileScreen> createState() => _EditProfileScreenState();
+  State<CustomerSupportScreen> createState() => _CustomerSupportScreenState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
 
+class _CustomerSupportScreenState extends State<CustomerSupportScreen> {
+
+  
     final _formKey = GlobalKey<FormState>();
-    final AuthService authService = AuthService();
    final TextEditingController _fullNameController = TextEditingController();
    final TextEditingController _phoneNumberController = TextEditingController();
-   final TextEditingController _countryController = TextEditingController();
-   final TextEditingController _cityController = TextEditingController();
+   final TextEditingController _departmentController = TextEditingController();
+   final TextEditingController _priorityController = TextEditingController();
    final TextEditingController _emailController = TextEditingController();
-   final TextEditingController _addressController = TextEditingController();
+   final TextEditingController _titleController = TextEditingController();
+   final TextEditingController _descriptionController = TextEditingController();
 
 
  @override
@@ -41,35 +39,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
     _fullNameController.dispose();
     _phoneNumberController.dispose();
-    _countryController.dispose();
-    _cityController.dispose();
+    _departmentController.dispose();
+    _priorityController.dispose();
     _emailController.dispose();
-    _addressController.dispose();
+    _titleController.dispose();
+    _descriptionController.dispose();
   }
   
   late String fullName;
   late String phoneNumber;
-  late String country;
-  late String city;
+  late String department;
+  late String priority;
   late String email;
-  late String address;
-
-void updateProfile()async{
-  User user = Provider.of<UserProvider>(context, listen: false).user;
-  authService.editProfile(
-  context: context, 
-  id:    user.id.toString(), 
-  name: _fullNameController.text, 
-  phone: _phoneNumberController.text, 
-  email: _emailController.text, 
-  dpLink: _pickedImage.toString(), 
-  country: selectedCountry.toString(), 
-  city: selectedCity.toString(), 
-  address: _addressController.text);
-}
+  late String title;
+  late String description;
 
 
-  final List<String?> errors = [];
+ final List<String?> errors = [];
 
   void addError({String? error}) {
     if (!errors.contains(error)) {
@@ -87,9 +73,7 @@ void updateProfile()async{
     }
   }
 
-  bool isLoading = false;
-
-  File? _pickedImage;
+   File? _pickedImage;
 
   Future<void> pickImage() async {
     try {
@@ -105,72 +89,30 @@ void updateProfile()async{
   }
 
 
-       String? selectedCountry;
-      String? selectedCity;
+      bool isLoading = false;
+      String? selectedDepartment;
+      String? selectedPriority;
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
         foregroundColor: Colors.white,
         backgroundColor: AppColor.lightOrange,
-        title: const Text( 'Edit Profile', style:TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))
+        title: const Text( 'Support Ticket', style:TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))
       ),
-
       body: SingleChildScrollView(
-        child: 
-        
+        child:     
     Padding(
           padding: const EdgeInsets.all(20),
           child: Form(
           key: _formKey,
           child: Column(
-
             children: [
-              SizedBox(
-      height: 115,
-      width: 115,
-      child: Stack(
-        fit: StackFit.expand,
-        clipBehavior: Clip.none,
-        children: [
-         _pickedImage == null ? const CircleAvatar(
-            radius: 100,
-            backgroundImage: AssetImage("assets/images/logo002.png"),
-          ) :
-          CircleAvatar(
-                radius: 100,
-                backgroundImage: FileImage(_pickedImage!),
-              ),
-          
-          Positioned(
-            right: -16,
-            bottom: 0,
-            child: SizedBox(
-              height: 46,
-              width: 46,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white, shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    side: const BorderSide(color: Colors.white),
-                  ),
-                  backgroundColor: const Color(0xFFF5F6F9),
-                ),
-                onPressed: () {
-                  pickImage();
-                },
-                child: SvgPicture.asset("assets/icons/Camera Icon.svg"),
-              ),
-            ),
-          )
-       
-        ],
-      ),
-    ),
               const SizedBox(height: 10,),
-              const Text('Update your profile', style:  TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),),
-              const SizedBox(height: 10,),
+              const Text('Submit A Ticket', style:  TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),),
+              const Text('Fill the form below to submit a ticket or complain and submit with a document attachedd.', style:  TextStyle(fontSize: 12), textAlign: TextAlign.center,),
+              const SizedBox(height: 20,),
               TextFormField(
                 controller: _fullNameController,
           onSaved: (newValue) => fullName = newValue!,
@@ -196,6 +138,7 @@ void updateProfile()async{
               ),
               SizedBox(height: getProportionateScreenHeight(20)),
               TextFormField(
+                // initialValue: "Basiru",
                 controller: _phoneNumberController,
           keyboardType: TextInputType.phone,
           onSaved: (newValue) => phoneNumber = newValue!,
@@ -252,47 +195,48 @@ void updateProfile()async{
               SizedBox(height: getProportionateScreenHeight(20)),
             DropdownButtonFormField<String>(
         decoration: const InputDecoration(
-          labelText: "Country",
+          labelText: "Department",
           floatingLabelBehavior: FloatingLabelBehavior.always,
           suffixIcon: CustomSurffixIcon(svgIcon: "assets/icons/Location point.svg"),
         ),
-        value: selectedCountry,
-        hint: const Text("-Select Country-"),
+        value: selectedDepartment,
+        hint: const Text("-Select Department-"),
         items: const [
-          DropdownMenuItem<String>(value: "Nigeria", child: Text('Nigeria')),
-          DropdownMenuItem<String>(value: "United Kingdom", child: Text('United Kingdom')),
+          DropdownMenuItem<String>(value: "Technical Support Desk", child: Text('Technical Support Desk')),
+          DropdownMenuItem<String>(value: "Customer Serivice Desk", child: Text('Customer Serivice Desk')),
+          DropdownMenuItem<String>(value: "Payment Serivice Desk", child: Text('Payment Serivice Desk')),
+          DropdownMenuItem<String>(value: "Abuse Department", child: Text('Abuse Department')),
         ],
         onChanged: (String? value) {
           setState(() {
-            selectedCountry = value;
-            selectedCity = null; // Reset city when country changes
+            selectedDepartment = value;
           });
         },
       ),
       SizedBox(height: getProportionateScreenHeight(20)),
       DropdownButtonFormField<String>(
         decoration: const InputDecoration(
-          labelText: "City",
+          labelText: "Priority",
           floatingLabelBehavior: FloatingLabelBehavior.always,
           suffixIcon: CustomSurffixIcon(svgIcon: "assets/icons/Location point.svg"),
         ),
-        value: selectedCity,
-        hint: const Text("-Select City-"),
-        items: selectedCountry != null
-            ? getStatesByCountry(selectedCountry!).map((String city) {
-                return DropdownMenuItem<String>(value: city, child: Text(city));
-              }).toList()
-            : [],
-        onChanged: (String? value) {
+        value: selectedPriority,
+        hint: const Text("-Select Priority-"),
+        items: const [
+          DropdownMenuItem<String>(value: "LOW", child: Text('LOW')),
+          DropdownMenuItem<String>(value: "MEDIUM", child: Text('MEDIUM')),
+          DropdownMenuItem<String>(value: "HIGH", child: Text('HIGH')),
+        ],
+         onChanged: (String? value) {
           setState(() {
-            selectedCity = value;
+            selectedPriority = value;
           });
         },
       ),
               SizedBox(height: getProportionateScreenHeight(20)),
               TextFormField(
-                controller: _addressController,
-          onSaved: (newValue) => address = newValue!,
+                controller: _titleController,
+          onSaved: (newValue) => title = newValue!,
           onChanged: (value) {
             if (value.isNotEmpty) {
               removeError(error: kAddressNullError);
@@ -307,24 +251,60 @@ void updateProfile()async{
             return null;
           },
           decoration: const InputDecoration(
-            labelText: "Address",
-            hintText: "Enter your phone address",
-            suffixIcon:
-                CustomSurffixIcon(svgIcon: "assets/icons/Location point.svg"),
+            labelText: "Title",
+            hintText: "Enter title",
           ),
+              ),
+              SizedBox(height: getProportionateScreenHeight(20)),
+              TextFormField(
+                maxLines: 6,
+                controller: _descriptionController,
+          onSaved: (newValue) => description = newValue!,
+          onChanged: (value) {
+            if (value.isNotEmpty) {
+              removeError(error: kAddressNullError);
+            }
+            return;
+          },
+          validator: (value) {
+            if (value!.isEmpty) {
+              addError(error: kAddressNullError);
+              return "";
+            }
+            return null;
+          },
+          decoration: const InputDecoration(
+            labelText: "Description",
+            hintText: "Enter description",
+          ),
+              ),
+              SizedBox(height: getProportionateScreenHeight(20)),
+              Row(
+                children: [
+                  ElevatedButton(
+                
+                    onPressed: (){
+                    pickImage();
+                  }, style: const ButtonStyle(
+                    elevation: MaterialStatePropertyAll(0.0),
+                    backgroundColor: MaterialStatePropertyAll(AppColor.lightOrange)), child: const Text("Upload file", style: TextStyle(color: Colors.white),),),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: 200,
+                    child: Text(_pickedImage == null ? '' : _pickedImage.toString(), overflow: TextOverflow.ellipsis,)),
+                ],
               ),
               FormError(errors: errors),
               SizedBox(height: getProportionateScreenHeight(40)),
                isLoading  ?  const Center(child: MyProgressor(),): DefaultButton(
-                text: "Update",
+                text: "Submit",
                 press: () async {
                   if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
                        setState(() {
                         isLoading = true;
                       });
-                      updateProfile();
-                      // Navigator.pushNamed(context, HomeScreen.routeName);
+                      // updateProfile();
                       await Future.delayed(const Duration(seconds: 5));
                       setState(() {
                         isLoading = false;
@@ -338,10 +318,7 @@ void updateProfile()async{
           ),
               ),
         ),
-     
-     
-      ),
-    
+      )
     );
   }
 }

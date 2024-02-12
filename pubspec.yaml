@@ -37,6 +37,9 @@ dependencies:
   currency_converter: ^0.0.5
   intl: ^0.18.1
   connectivity_plus: ^5.0.2
+  currency_text_input_formatter: ^2.1.11
+  flutter_multi_formatter: ^2.12.4
+  money_formatter: ^0.0.5
 
 dev_dependencies:
   flutter_lints: ^3.0.1

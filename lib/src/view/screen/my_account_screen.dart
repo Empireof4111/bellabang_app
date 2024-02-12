@@ -17,62 +17,69 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
-        foregroundColor: Colors.white,
-        backgroundColor: AppColor.lightOrange,
-        title: const Text( 'My Personal Info', style:TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))
-      ),
+      appBar: AppBar(
+          foregroundColor: Colors.white,
+          backgroundColor: AppColor.lightOrange,
+          title: const Text('My Personal Info',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white))),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             ListTile(
-                onTap: () {
-                  Navigator.pushNamed(context, EditProfileScreen.routeName);
-                },
-                leading: SvgPicture.asset(
-                  "assets/icons/edit-profile.svg",
-                  height: 30,
-                  width: 30,
-                  color: Colors.black,
-                ),
-                title: Text(
-                  "Edit Profile",
-                  style: Theme.of(context).textTheme.displaySmall,
-                ),
-                trailing: const Icon(
-                  Icons.arrow_forward_ios,
-                  size: 20,
-                  color: Colors.black,
-                ),
-                tileColor: AppColor.lightOrange.withOpacity(0.1),
-                shape: RoundedRectangleBorder(
+              onTap: () {
+                Navigator.pushNamed(context, EditProfileScreen.routeName);
+              },
+              leading: SvgPicture.asset(
+                "assets/icons/edit-profile.svg",
+                height: 30,
+                width: 30,
+                color: AppColor.lightOrange,
+              ),
+              title: Text(
+                "Edit Profile",
+                style: Theme.of(context).textTheme.displaySmall,
+              ),
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                size: 20,
+                color: AppColor.lightOrange,
+              ),
+              tileColor: Colors.white,
+              shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
-                )),
+                  side: BorderSide(
+                      width: 0.5, color: Colors.grey.withOpacity(0.5))),
+            ),
             const SizedBox(height: 5),
             ListTile(
-                onTap: () {
-                  Navigator.pushNamed(context, EditPasswordScreen.routeName);
-                },
-                leading: SvgPicture.asset(
-                  "assets/icons/change-password-icon.svg",
-                  height: 24,
-                  width: 24,
-                  color: Colors.black,
-                ),
-                title: Text(
-                  "Change Password",
-                  style: Theme.of(context).textTheme.displaySmall,
-                ),
-                trailing: const Icon(
-                  Icons.arrow_forward_ios,
-                  size: 20,
-                  color: Colors.black,
-                ),
-                tileColor: AppColor.lightOrange.withOpacity(0.1),
-                shape: RoundedRectangleBorder(
+              onTap: () {
+                Navigator.pushNamed(context, EditPasswordScreen.routeName);
+              },
+              leading: SvgPicture.asset(
+                "assets/icons/change-password-icon.svg",
+                height: 24,
+                width: 24,
+                color: AppColor.lightOrange,
+              ),
+              title: Text(
+                "Change Password",
+                style: Theme.of(context).textTheme.displaySmall,
+              ),
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                size: 20,
+                color: AppColor.lightOrange,
+              ),
+              tileColor: Colors.white,
+              shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
-                )),
+                  side: BorderSide(
+                      width: 0.5, color: Colors.grey.withOpacity(0.5))),
+            ),
           ],
         ),
       ),

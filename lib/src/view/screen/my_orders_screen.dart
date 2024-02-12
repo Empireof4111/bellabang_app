@@ -22,58 +22,62 @@ class MyOrderScreen extends StatefulWidget {
   State<MyOrderScreen> createState() => _MyOrderScreenState();
 }
 
- List<OrderModel>? myorderList;
-
-
-
+List<OrderModel>? myorderList;
 
 class _MyOrderScreenState extends State<MyOrderScreen> {
-
- final OrderServices  orderServices = OrderServices();
-
+  final OrderServices orderServices = OrderServices();
 
   @override
   void initState() {
     super.initState();
     fetchAllOrders();
-
   }
 
+  void fetchAllOrders() async {
+    User user = Provider.of<UserProvider>(context, listen: false).user;
+    myorderList =
+        await orderServices.getOrderByUserId(context, user.id!.toInt());
+  }
 
-void fetchAllOrders()async{
-  User user = Provider.of<UserProvider>(context, listen: false).user;
-myorderList = await orderServices.getOrderByUserId(context, user.id!.toInt());
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+          foregroundColor: Colors.white,
+          backgroundColor: AppColor.lightOrange,
+          title: const Text('My Orders',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white))),
+      body: myorderList == null
+          ? const Center(
+              child: MyProgressor(),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView.builder(
+                itemCount: (myorderList == null) ? 0 : myorderList!.length,
+                itemBuilder: (BuildContext context, index) {
+                  return OrderCard(
+                    amount: myorderList![index].totalAmount.toString(),
+                    date: myorderList![index].createdDate as int,
+                    status: myorderList![index].status.toString(),
+                    press: () {
+                      Navigator.pushNamed(
+                          context,
+                          arguments: myorderList![index].id,
+                          TrackOrderScreen.routeName);
+                    },
+                    orderRefId: myorderList![index].orderReferenceId as int,
+                  );
+                },
+              ),
+            ),
+    );
+  }
 }
 
-@override
-Widget build(BuildContext context) {
-
-  return Scaffold(
-     appBar: AppBar(
-        foregroundColor: Colors.white,
-        backgroundColor: AppColor.lightOrange,
-        title: const Text( 'My Orders', style:TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))
-      ),
-    body: myorderList == null ? const Center(child: MyProgressor(),) : Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ListView.builder(
-        itemCount: (myorderList == null ) ? 0 : myorderList!.length, 
-        itemBuilder: (BuildContext context, index) {
-          return OrderCard(
-            amount: myorderList![index].totalAmount.toString(),
-            date: myorderList![index].createdDate as int,
-            status: myorderList![index].status.toString(),
-            press: () {
-              Navigator.pushNamed(context, arguments: myorderList![index].id, TrackOrderScreen.routeName);
-            },
-            orderRefId: myorderList![index].orderReferenceId as int,
-          );
-        },
-      ),
-    ),
-  );
-}
-}
 class OrderCard extends StatefulWidget {
   final int orderRefId;
   final String amount;
@@ -94,92 +98,99 @@ class OrderCard extends StatefulWidget {
 }
 
 class _OrderCardState extends State<OrderCard> {
-    String orderstatus(String stat){
-      late  String myOrderStatus = '';
-        if(stat == "CA"){
-          myOrderStatus = 'Cancel';
-          isCancel = true;
-      }else if(stat == 'PP'){
-        myOrderStatus = "Pending Payment";
-          isCancel = true;
-      }else{
-        myOrderStatus = "Completed";
-      }
-      return myOrderStatus;
-      }
-    bool isCancel = false;
+  String orderstatus(String stat) {
+    late String myOrderStatus = '';
+    if (stat == "CA") {
+      myOrderStatus = 'Cancel';
+      isCancel = true;
+    } else if (stat == 'PP') {
+      myOrderStatus = "Pending Payment";
+      isCancel = true;
+    } else {
+      myOrderStatus = "Completed";
+    }
+    return myOrderStatus;
+  }
+
+  bool isCancel = false;
   @override
   Widget build(BuildContext context) {
     DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(widget.date);
-      String formattedDateTime = DateFormat.yMMMd().add_jm().format(dateTime);
+    String formattedDateTime = DateFormat.yMMMd().add_jm().format(dateTime);
     return Padding(
-      padding: const EdgeInsets.only(
-          left: 20, right: 10, top: 5, bottom: 5),
-      child: ListTile(
-        shape: const Border( top: BorderSide(color: Colors.grey)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-        titleAlignment: ListTileTitleAlignment.bottom,
-        leading: CircleAvatar(
-        child:  SvgPicture.asset(
-              "assets/icons/shopping-bag.svg",
-              height: 24,
-              width: 24,
-            ),
-        ),
-       
-        trailing: SizedBox( width: 100, height: 40, child: DefaultButton(press: widget.press, text: 'Deatail')),
-        title:  Text('Order ID: #${widget.orderRefId}', style: const TextStyle(
-          color: Colors.black, fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),),
-                subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        padding: const EdgeInsets.all(4),
+        child: Container(
+          height: 100,
+          width: double.infinity,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border:
+                  Border.all(width: 0.5, color: Colors.grey.withOpacity(0.5))),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Text('Date: $formattedDateTime'),
-                Text('Amount: ${widget.amount}'),
-                Text('Status: ${orderstatus(widget.status)}', style: TextStyle(
-                  color: isCancel ? Colors.red : AppColor.lightOrange
-                ),),
-                
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Order ID: #${widget.orderRefId}",
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text("Date: $formattedDateTime"),
+                    Text("Amount: ${widget.amount}"),
+                    Text(
+                      "Date: ${orderstatus(widget.status)}",
+                      style: TextStyle(
+                          color: isCancel ? Colors.red : AppColor.lightOrange),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                    height: 40,
+                    width: 80,
+                    child: DefaultButton(press: widget.press, text: 'Details')),
               ],
-              
             ),
-            ),
-             );
+          ),
+        ));
   }
 }
 
-
-
-  // ignore: unused_element
-  Widget _ratingBar(BuildContext context) {
-    return Wrap(
-      spacing: 10,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        RatingBar.builder(
-          itemSize: 25,
-          initialRating: 4,
-          direction: Axis.horizontal,
-          itemBuilder: (_, __) => const Icon(
-            Icons.star,
-            color: Colors.amber,
-          ),
-          onRatingUpdate: (_) {},
+// ignore: unused_element
+Widget _ratingBar(BuildContext context) {
+  return Wrap(
+    spacing: 10,
+    crossAxisAlignment: WrapCrossAlignment.center,
+    children: [
+      RatingBar.builder(
+        itemSize: 25,
+        initialRating: 4,
+        direction: Axis.horizontal,
+        itemBuilder: (_, __) => const Icon(
+          Icons.star,
+          color: Colors.amber,
         ),
-        
-        // Text(
-        //   "(4500 Reviews)",
-        //   style: Theme.of(context)
-        //       .textTheme
-        //       .displaySmall
-        //       ?.copyWith(fontWeight: FontWeight.w300, fontSize: 18),
-        // )
-      
-      ],
-    );
-  }
+        onRatingUpdate: (_) {},
+      ),
+
+      // Text(
+      //   "(4500 Reviews)",
+      //   style: Theme.of(context)
+      //       .textTheme
+      //       .displaySmall
+      //       ?.copyWith(fontWeight: FontWeight.w300, fontSize: 18),
+      // )
+    ],
+  );
+}
 
 class ReviewProductCard extends StatelessWidget {
   const ReviewProductCard({
@@ -188,68 +199,66 @@ class ReviewProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-                    padding: const EdgeInsets.only(
-                        left: 20, right: 20, top: 5, bottom: 5),
-                    child: Container(
-                      height: 120,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColor.lightGrey,
-                            blurRadius: 25.0, // soften the shadow
-                            spreadRadius: 1.0, //extend the shadow
-                            offset: Offset(
-                              0.0, // Move to right 10  horizontally
-                              0.0, // Move to bottom 10 Vertically
-                            ),
-                          )
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Container(
-                              height: 100,
-                              width: 90,
-                              decoration: const BoxDecoration(
-                                color: AppColor.lightGrey,
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(10),
-                                ),
-                              ),
-                              child:
-                                  Image.asset("assets/images/beats_studio_3-2.png"),
-                            ),
-                            const SizedBox(
-                              height: 120,
-                              width: 200,
-                              child: Column(
-                                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    children: [
-                                      Text(
-                                        'No. One HaedPhone',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                        ),
-                                        maxLines: 1,
-                                      ),
-                                      Text('Color: Red | Size: XL'),
-                                    ],
-                                  ),                      
-                                ],
-                              ),
-                            )
-                          ],
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 5, bottom: 5),
+      child: Container(
+        height: 120,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          boxShadow: [
+            BoxShadow(
+              color: AppColor.lightGrey,
+              blurRadius: 25.0, // soften the shadow
+              spreadRadius: 1.0, //extend the shadow
+              offset: Offset(
+                0.0, // Move to right 10  horizontally
+                0.0, // Move to bottom 10 Vertically
+              ),
+            )
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Container(
+                height: 100,
+                width: 90,
+                decoration: const BoxDecoration(
+                  color: AppColor.lightGrey,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(10),
+                  ),
+                ),
+                child: Image.asset("assets/images/beats_studio_3-2.png"),
+              ),
+              const SizedBox(
+                height: 120,
+                width: 200,
+                child: Column(
+                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          'No. One HaedPhone',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                          maxLines: 1,
                         ),
-                      ),
+                        Text('Color: Red | Size: XL'),
+                      ],
                     ),
-                  );
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
